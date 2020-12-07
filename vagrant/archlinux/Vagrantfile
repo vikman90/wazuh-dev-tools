@@ -1,0 +1,27 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+# Vikman Fernandez-Castro
+# June 4, 2020
+
+require_relative "../shared/shared.rb"
+
+Vagrant.configure("2") do |config|
+    config.vm.define "archlinux" do |archlinux|
+      archlinux.vm.box = "archlinux/archlinux"
+      archlinux.vm.hostname = "archlinux"
+      archlinux.vm.network "private_network", ip: $hosts[archlinux.vm.hostname]
+    end
+
+    # The vboxsf filesystem is not installed so we can't share folders
+    config.vm.synced_folder ".", "/vagrant", disabled: true
+
+    config.vm.provision "file", source: "../shared", destination: "shared"
+    config.vm.provision "shell", path: "setup.sh"
+
+    config.vm.provider "virtualbox" do |v|
+      v.cpus = 4
+      v.memory = 1024
+      v.default_nic_type = "virtio"
+    end
+
+  end

@@ -1,0 +1,27 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+# Vikman Fernandez-Castro
+# July 13, 2020
+
+require_relative "../shared/shared.rb"
+
+Vagrant.configure("2") do |config|
+    config.vm.define "gentoo" do |gentoo|
+      gentoo.vm.box = "generic/gentoo"
+      gentoo.vm.hostname = "gentoo"
+      gentoo.vm.network "private_network", ip: $hosts[gentoo.vm.hostname]
+    end
+
+    # The vboxsf filesystem is not installed so we can't share folders
+    config.vm.synced_folder ".", "/vagrant", disabled: true
+
+    config.vm.provision "file", source: "../shared", destination: "shared"
+    config.vm.provision "shell", path: "setup.sh"
+
+    config.vm.provider "virtualbox" do |v|
+      v.cpus = 4
+      v.memory = 1024
+      v.default_nic_type = "virtio"
+    end
+
+  end

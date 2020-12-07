@@ -1,0 +1,44 @@
+version: "3.8"
+services:
+  elasticsearch:
+    image: amazon/opendistro-for-elasticsearch:1.11.0
+    networks:
+      - wazuh-net
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+
+  kibana:
+    build: kibana
+    ports:
+      - 5601:5601
+    networks:
+      - wazuh-net
+    environment:
+      ELASTICSEARCH_HOSTS: https://elasticsearch:9200
+
+  wazuh-master:
+    build: wazuh-manager
+    environment:
+      cluster_disabled: "no"
+      cluster_type: master
+      cluster_master: wazuh-master
+    networks:
+      - wazuh-net
+
+  wazuh-worker:
+    build: wazuh-manager
+    environment:
+      cluster_disabled: "no"
+      cluster_type: worker
+      cluster_master: wazuh-master
+    networks:
+      - wazuh-net
+
+  wazuh-agent:
+    build: wazuh-agent
+    networks:
+      - wazuh-net
+
+networks:
+  wazuh-net:
