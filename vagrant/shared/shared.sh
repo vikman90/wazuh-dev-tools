@@ -6,6 +6,10 @@ source shared/config.sh
 
 SHARED_DIR="/home/vagrant/shared"
 
+version_le() {
+    [ "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
+}
+
 setup_files() {
     cat $SHARED_DIR/hosts >> /etc/hosts
 }
@@ -17,7 +21,14 @@ setup_git() {
     git config --global commit.gpgsign true
     git config --global color.ui true
     git config --global core.editor nano
-    git config --global push.default simple
+
+    if version_le "git version 1.7.11" "`git --version`"
+    then
+        git config --global push.default simple
+    fi
+
+    # Ubuntu 20.10 - git version 2.27.0
+    git config --global pull.rebase false
 
     gpg --batch --import $SHARED_DIR/private/gpg_key.asc
 }
