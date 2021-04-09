@@ -2,13 +2,13 @@
 # Wazuh Inc.
 # May 22, 2016
 #
-# Rev 9
+# Rev 10
 #
 # Install:
 # Go to the directory that contains this file and run:
-# cp wazuh.sh ~/.wazuh.sh && echo -e '\n. $HOME/.wazuh.sh' >> ~/.bashrc && . ~/.bashrc
+# cp wazuh_shell.sh ~/.wazuh.sh && echo -e '\n. $HOME/.wazuh.sh' >> ~/.bashrc && . ~/.bashrc
 
-# Overwrite this value at your preference
+# Set these values at your convenience
 THREADS=2
 GIT_DEPTH=64
 
@@ -82,7 +82,8 @@ alias watch-doc="make clean && make -j$THREADS html && while true; do inotifywai
 alias vagrant-halt='vagrant global-status | grep running | cut -d" " -f1 | while read i; do vagrant halt $i; done'
 alias scan-view='scan-view /tmp/scan-build-* --host 0.0.0.0 --port 80 --allow-all-hosts --no-browser'
 alias scan-build='find /tmp -name "scan-build-*" -exec rm -r {} +; scan-build make -j$THREADS TARGET=server DEBUG=yes'
-alias unit-tests='make clean-internals && make-server TEST=1 && cd unit_tests && mkdir -p build && cd build && cmake .. && make clean && make && make test'
+alias unit-tests='make clean-internals && make-server-test && cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=server .. && make clean && make -j$THREADS && make test'
+alias wazuh-api='curl -w\\n -sk -H "Authorization: Bearer $(curl -u wazuh:wazuh -sk -X GET "https://localhost:55000/security/user/authenticate?raw=true")"'
 
 git-clone-wazuh() {
     if [ -n "$1" ]
