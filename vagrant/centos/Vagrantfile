@@ -7,19 +7,19 @@ require_relative "../shared/shared.rb"
 
 Vagrant.configure("2") do |config|
   config.vm.define "centos8" do |centos|
-    centos.vm.box = "centos/8"
+    centos.vm.box = "bento/centos-8"
     centos.vm.hostname = "centos8"
     centos.vm.network "private_network", ip: $hosts[centos.vm.hostname]
   end
 
   config.vm.define "centos7", autostart: false do |centos|
-    centos.vm.box = "centos/7"
+    centos.vm.box = "bento/centos-7"
     centos.vm.hostname = "centos7"
     centos.vm.network "private_network", ip: $hosts[centos.vm.hostname]
   end
 
   config.vm.define "centos6", autostart: false do |centos|
-    centos.vm.box = "centos/6"
+    centos.vm.box = "bento/centos-6"
     centos.vm.hostname = "centos6"
     centos.vm.network "private_network", ip: $hosts[centos.vm.hostname]
   end
