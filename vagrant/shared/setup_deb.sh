@@ -15,13 +15,14 @@ apt-key-add() {
 }
 
 setup_packages() {
+    dpkg --add-architecture i386
     apt-get update
 
     # Package installer dependencies
     apt-get-install apt-transport-https
 
     # Wazuh required packages
-    apt-get-install make gcc curl git automake autoconf libtool gcc-mingw-w64-i686 nsis nodejs npm cmake libcmocka-dev lcov
+    apt-get-install make gcc curl git automake autoconf libtool gcc-mingw-w64-i686 g++-mingw-w64-i686 nsis nodejs npm cmake libcmocka-dev lcov wine32
 
     if [ "$VERSION_CODENAME" = "xenial" ]
     then
