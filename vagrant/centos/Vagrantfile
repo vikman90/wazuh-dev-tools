@@ -28,7 +28,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", path: "setup.sh"
 
   config.vm.provider "virtualbox" do |v|
-    v.memory = 512
+    v.memory = 2048
     v.cpus = 4
     v.default_nic_type = "virtio"
     v.customize ["modifyvm", :id, "--audio", "none"]

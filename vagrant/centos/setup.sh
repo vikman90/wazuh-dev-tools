@@ -17,11 +17,11 @@ yum-install() {
 setup_packages() {
     if [ $OS_MAJOR -ge 8 ]
     then
-        yum config-manager --set-enabled PowerTools
+        yum config-manager --set-enabled powertools
     fi
 
     # Wazuh required packages
-    yum-install make gcc git automake autoconf libtool checkpolicy nodejs npm libcmocka-devel
+    yum-install make gcc git automake autoconf libtool checkpolicy nodejs npm libcmocka-devel gcc-c++ libstdc++-static
 
     # Shell tools
     yum-install gdb nano valgrind net-tools psmisc tcpdump git wget strace
@@ -32,10 +32,17 @@ setup_packages() {
     else
         yum-install policycoreutils-python
     fi
+
+    # cmake
+
+    wget https://github.com/Kitware/CMake/releases/download/v3.19.5/cmake-3.19.5-Linux-x86_64.sh
+    sh cmake-3.19.5-Linux-x86_64.sh --skip-license --prefix=/usr
+    rm cmake-3.19.5-Linux-x86_64.sh
 }
 
 setup_python() {
     yum-install epel-release python3 redhat-rpm-config python3-devel
+    pip3 install --upgrade pip
     pip3 install jq pytest numpydoc psutil pytest-html jsonschema paramiko
 }
 
