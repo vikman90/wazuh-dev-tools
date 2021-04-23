@@ -6,7 +6,13 @@
 require_relative "../shared/shared.rb"
 
 Vagrant.configure("2") do |config|
-    config.vm.define "groovy" do |v|
+    config.vm.define "hirsute" do |v|
+      v.vm.box = "ubuntu/hirsute64"
+      v.vm.hostname = "hirsute"
+      v.vm.network "private_network", ip: $hosts[v.vm.hostname]
+    end
+
+    config.vm.define "groovy", autostart: false do |v|
       v.vm.box = "ubuntu/groovy64"
       v.vm.hostname = "groovy"
       v.vm.network "private_network", ip: $hosts[v.vm.hostname]
