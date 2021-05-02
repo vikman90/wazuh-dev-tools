@@ -60,13 +60,16 @@ setup_nfs() {
     exportfs -ra
 }
 
-setup_packages
-setup_python
-setup_wazuh_repo
-setup_files
-setup_git
-setup_shell
-setup_ssh
-setup_timezone
-setup_nfs
-setup_cleanup
+if [ $_ = $0 ]
+then
+    setup_packages
+    setup_python
+    setup_wazuh_repo
+    setup_files
+    setup_git
+    setup_shell
+    setup_ssh
+    setup_timezone
+    setup_nfs
+    setup_cleanup
+fi

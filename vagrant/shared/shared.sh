@@ -4,14 +4,21 @@
 
 source shared/config.sh
 
-SHARED_DIR="/home/vagrant/shared"
+if [ -z "$SHARED_DIR" ]
+then
+    1>&2 echo "ERROR: SHARED_DIR is undefined."
+    exit 1
+fi
 
 version_le() {
     [ "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
 }
 
 setup_files() {
-    cat $SHARED_DIR/hosts >> /etc/hosts
+    if [ -f $SHARED_DIR/hosts ]
+    then
+        cat $SHARED_DIR/hosts >> /etc/hosts
+    fi
 }
 
 setup_git() {
@@ -34,21 +41,21 @@ setup_git() {
 }
 
 setup_shell() {
-    cp -rT /etc/skel /root
-    cp $SHARED_DIR/wazuh_shell.sh /root/.wazuh_shell
-    echo 'source /root/.wazuh_shell' >> /root/.bashrc
-    echo 'export GPG_TTY=$(tty)' >> /root/.bashrc
+    cp -rT /etc/skel $HOME
+    cp $SHARED_DIR/wazuh_shell.sh $HOME/.wazuh_shell
+    echo 'source $HOME/.wazuh_shell' >> $HOME/.bashrc
+    echo 'export GPG_TTY=$(tty)' >> $HOME/.bashrc
 
     # Uncomment l* aliases [Debian]
-    sed -i 's/^#\(alias l.*\)/\1/g' /root/.bashrc
+    sed -i 's/^#\(alias l.*\)/\1/g' $HOME/.bashrc
 }
 
 setup_ssh() {
-    mkdir -p /root/.ssh
+    mkdir -p $HOME/.ssh
     chmod 700 ~/.ssh
-    cp $SHARED_DIR/private/id_rsa* /root/.ssh
-    cp /root/.ssh/id_rsa.pub /root/.ssh/authorized_keys
-    chmod 600 /root/.ssh/{id_rsa,authorized_keys}
+    cp $SHARED_DIR/private/id_rsa* $HOME/.ssh
+    cp $HOME/.ssh/id_rsa.pub $HOME/.ssh/authorized_keys
+    chmod 600 $HOME/.ssh/{id_rsa,authorized_keys}
 }
 
 setup_timezone() {
