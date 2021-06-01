@@ -9,6 +9,7 @@ export SHARED_DIR=`realpath shared`
 
 sudo -E bash -c "source shared/setup_deb.sh; setup_packages"
 sudo -E bash -c "source shared/setup_deb.sh; setup_python"
+sudo -E bash -c "source shared/setup_deb.sh; setup_cmocka_win"
 sudo -E bash -c "source shared/setup_deb.sh; setup_wazuh_repo"
 sudo -E bash -c "source shared/setup_deb.sh; setup_files"
 

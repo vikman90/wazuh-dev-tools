@@ -46,6 +46,18 @@ setup_python() {
     pip3 install jq pytest numpydoc psutil pytest-html jsonschema paramiko
 }
 
+setup_cmocka_win() {
+    git clone -b stable-1.1 https://git.cryptomilk.org/projects/cmocka.git
+    sed -Ei 's/(BUILD_SHARED_LIBS .+) ON/\1 OFF/' cmocka/DefineOptions.cmake
+    mkdir cmocka/build
+    cd cmocka/build
+    cmake -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc -DCMAKE_C_LINK_EXECUTABLE=i686-w64-mingw32-ld -DCMAKE_INSTALL_PREFIX=/usr/i686-w64-mingw32/ -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_BUILD_TYPE=Release ..
+    make
+    make install
+    cd ../..
+    rm -r cmocka
+}
+
 setup_wazuh_repo() {
     curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key-add
     echo "deb https://packages.wazuh.com/4.x/apt/ stable main" > /etc/apt/sources.list.d/wazuh.list
@@ -64,6 +76,7 @@ if [ $_ = $0 ]
 then
     setup_packages
     setup_python
+    setup_cmocka_win
     setup_wazuh_repo
     setup_files
     setup_git
