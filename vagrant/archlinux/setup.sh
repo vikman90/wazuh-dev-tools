@@ -24,7 +24,8 @@ setup_nfs() {
     exportfs -rav
 
     systemctl enable nfs-server.service
-    systemctl start nfs-server.service
+    # systemctl start nfs-server.service
+    >&2 echo "INFO: You need to reboot in order to enable NFS."
 }
 
 setup_packages
