@@ -23,8 +23,8 @@ Vagrant.configure("2") do |config|
     config.vm.provision "shell", path: "../shared/setup_deb.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
 
     config.vm.provider "virtualbox" do |v|
-      v.memory = 1024
-      v.cpus = 4
+      v.memory = 2048
+      v.cpus = 8
       v.default_nic_type = "virtio"
     end
   end
