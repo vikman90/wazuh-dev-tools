@@ -10,7 +10,7 @@
 
 # Set these values at your convenience
 THREADS=2
-GIT_DEPTH=64
+GIT_DEPTH=128
 
 if [ -z "$THREADS" ]
 then
@@ -98,7 +98,7 @@ git-clone-wazuh() {
 }
 
 git-add-branches() {
-    git remote set-branches --add origin $@ && git fetch --depth 64
+    git remote set-branches --add origin $@ && git fetch --depth $GIT_DEPTH
 }
 
 function sgrep() {
