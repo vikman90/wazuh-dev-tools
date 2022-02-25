@@ -1,0 +1,23 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+# Vikman Fernandez-Castro
+# February 25, 2022
+
+require_relative "../shared/shared.rb"
+
+Vagrant.configure("2") do |config|
+  config.vm.define "tumbleweed" do |opensuse|
+    opensuse.vm.box = "opensuse/Tumbleweed.x86_64"
+    opensuse.vm.hostname = "tumbleweed"
+    opensuse.vm.network "private_network", ip: $hosts[opensuse.vm.hostname]
+  end
+
+  config.vm.provision "file", source: "../shared", destination: "shared"
+  config.vm.provision "shell", path: "setup.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
+
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 2048
+    v.cpus = 8
+    v.default_nic_type = "virtio"
+  end
+end
