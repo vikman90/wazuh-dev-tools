@@ -6,9 +6,13 @@ set -e
 source shared/shared.sh
 
 # Detect CentOS version
-OS_VERSION=$(grep -oE '[0-9]+\.[0-9]+' /etc/centos-release)
-OS_MAJOR=$(echo $OS_VERSION | cut -d. -f1)
-[ -n "$OS_MAJOR" ]
+OS_MAJOR=$(grep -oE '[0-9]+' /etc/centos-release | head -n1)
+
+if [ -z "$OS_MAJOR" ]
+then
+    >&2 echo "ERROR: cannot parse /etc/centos-release (OS_MAJOR)"
+    exit 1
+fi
 
 yum-install() {
     yum install -y $@
