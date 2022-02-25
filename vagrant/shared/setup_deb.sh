@@ -2,6 +2,8 @@
 # Vikman Fernandez-Castro
 # February 8, 2020
 
+[ $_ = $0 ] || sourced=0
+
 set -e
 source shared/shared.sh
 source /etc/os-release
@@ -22,7 +24,7 @@ setup_packages() {
     apt-get-install apt-transport-https
 
     # Wazuh required packages
-    apt-get-install make gcc curl git automake autoconf libtool gcc-mingw-w64-i686 g++-mingw-w64-i686 nsis nodejs npm cmake libcmocka-dev lcov wine32
+    apt-get-install make gcc curl git automake autoconf libtool gcc-mingw-w64-i686 g++-mingw-w64-i686 nsis nodejs npm cmake libcmocka-dev lcov wine32 cppcheck astyle
 
     if [ "$VERSION_CODENAME" = "xenial" ]
     then
@@ -72,7 +74,7 @@ setup_nfs() {
     exportfs -ra
 }
 
-if [ $_ = $0 ]
+if [ -z "$sourced" ]
 then
     setup_packages
     setup_python
