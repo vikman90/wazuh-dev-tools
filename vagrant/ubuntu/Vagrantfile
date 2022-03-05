@@ -7,31 +7,31 @@ require_relative "../shared/shared.rb"
 
 Vagrant.configure("2") do |config|
     config.vm.define "impish" do |v|
-      v.vm.box = "ubuntu/impish64"
+      v.vm.box = "generic/ubuntu2110"
       v.vm.hostname = "impish"
       v.vm.network "private_network", ip: $hosts[v.vm.hostname]
     end
 
     config.vm.define "hirsute", autostart: false do |v|
-      v.vm.box = "ubuntu/hirsute64"
+      v.vm.box = "generic/ubuntu2104"
       v.vm.hostname = "hirsute"
       v.vm.network "private_network", ip: $hosts[v.vm.hostname]
     end
 
     config.vm.define "groovy", autostart: false do |v|
-      v.vm.box = "ubuntu/groovy64"
+      v.vm.box = "generic/ubuntu2010"
       v.vm.hostname = "groovy"
       v.vm.network "private_network", ip: $hosts[v.vm.hostname]
     end
 
     config.vm.define "focal", autostart: false do |focal|
-      focal.vm.box = "ubuntu/focal64"
+      focal.vm.box = "generic/ubuntu2004"
       focal.vm.hostname = "focal"
       focal.vm.network "private_network", ip: $hosts[focal.vm.hostname]
     end
 
     config.vm.define "eoan", autostart: false do |eoan|
-      eoan.vm.box = "ubuntu/eoan64"
+      eoan.vm.box = "generic/ubuntu1910"
       eoan.vm.hostname = "eoan"
       eoan.vm.network "private_network", ip: $hosts[eoan.vm.hostname]
     end
