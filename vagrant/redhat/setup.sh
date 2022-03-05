@@ -25,10 +25,10 @@ setup_packages() {
     fi
 
     # Wazuh required packages
-    yum-install make gcc git automake autoconf libtool checkpolicy nodejs npm libcmocka-devel gcc-c++ libstdc++-static
+    yum-install make gcc git automake autoconf libtool checkpolicy libcmocka-devel gcc-c++ libstdc++-static
 
     # Shell tools
-    yum-install gdb nano valgrind net-tools psmisc tcpdump git wget strace
+    yum-install gdb nano valgrind net-tools psmisc tcpdump git wget strace python3
 
     if [ $OS_MAJOR -ge 7 ]
     then
@@ -48,12 +48,6 @@ setup_packages() {
         rm cmake.sh
     fi
 
-}
-
-setup_python() {
-    yum-install epel-release python3 redhat-rpm-config python3-devel
-    pip3 install --upgrade pip
-    pip3 install jq pytest numpydoc psutil pytest-html jsonschema paramiko
 }
 
 setup_wazuh_repo() {
@@ -100,12 +94,6 @@ setup_nfs() {
 }
 
 setup_packages
-
-if [ $OS_MAJOR -ge 7 ]
-then
-    setup_python
-fi
-
 setup_wazuh_repo
 setup_files
 setup_git

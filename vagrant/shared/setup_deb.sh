@@ -24,7 +24,7 @@ setup_packages() {
     apt-get-install apt-transport-https
 
     # Wazuh required packages
-    apt-get-install make gcc curl git automake autoconf libtool gcc-mingw-w64-i686 g++-mingw-w64-i686 nsis nodejs npm cmake libcmocka-dev lcov wine32 cppcheck astyle
+    apt-get-install make gcc curl git automake autoconf libtool gcc-mingw-w64-i686 g++-mingw-w64-i686 nsis cmake libcmocka-dev lcov wine32 cppcheck astyle
 
     if [ "$VERSION_CODENAME" = "xenial" ]
     then
@@ -34,18 +34,7 @@ setup_packages() {
     fi
 
     # Shell tools
-    apt-get-install gdb valgrind net-tools psmisc tcpdump sqlite3 netcat-openbsd strace glibc-doc
-}
-
-setup_python() {
-    apt-get-install python3-pip
-
-    # Ubuntu needs to enable the source repositories
-    sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list
-    apt-get update
-    apt-get build-dep -y python3
-
-    pip3 install jq pytest numpydoc psutil pytest-html jsonschema paramiko
+    apt-get-install gdb valgrind net-tools psmisc tcpdump sqlite3 netcat-openbsd strace glibc-doc python3 python3-pip
 }
 
 setup_cmocka_win() {
@@ -77,7 +66,6 @@ setup_nfs() {
 if [ -z "$sourced" ]
 then
     setup_packages
-    setup_python
     setup_cmocka_win
     setup_wazuh_repo
     setup_files
