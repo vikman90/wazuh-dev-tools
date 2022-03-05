@@ -6,7 +6,13 @@
 require_relative "../shared/shared.rb"
 
 Vagrant.configure("2") do |config|
-  config.vm.define "centos8" do |centos|
+  config.vm.define "rocky" do |v|
+    v.vm.box = "bento/rockylinux-8"
+    v.vm.hostname = "rocky"
+    v.vm.network "private_network", ip: $hosts[v.vm.hostname]
+  end
+
+  config.vm.define "centos8", autostart: false do |centos|
     centos.vm.box = "bento/centos-stream-8"
     centos.vm.hostname = "centos8"
     centos.vm.network "private_network", ip: $hosts[centos.vm.hostname]

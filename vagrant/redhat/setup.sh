@@ -37,11 +37,17 @@ setup_packages() {
         yum-install policycoreutils-python
     fi
 
-    # cmake
+    # CMake >= 3.20
 
-    wget https://github.com/Kitware/CMake/releases/download/v3.19.5/cmake-3.19.5-Linux-x86_64.sh
-    sh cmake-3.19.5-Linux-x86_64.sh --skip-license --prefix=/usr
-    rm cmake-3.19.5-Linux-x86_64.sh
+    if [ $OS_MAJOR -ge 8 ]
+    then
+        yum-install cmake
+    else
+        wget -qO cmake.sh https://github.com/Kitware/CMake/releases/download/v3.22.3/cmake-3.22.3-linux-x86_64.sh
+        sh cmake.sh --skip-license --prefix=/usr/local
+        rm cmake.sh
+    fi
+
 }
 
 setup_python() {
