@@ -12,6 +12,12 @@ Vagrant.configure("2") do |config|
     opensuse.vm.network "private_network", ip: $hosts[opensuse.vm.hostname]
   end
 
+  config.vm.define "leap", autostart: false do |leap|
+    leap.vm.box = "generic/opensuse15"
+    leap.vm.hostname = "leap"
+    leap.vm.network "private_network", ip: $hosts[leap.vm.hostname]
+  end
+
   config.vm.provision "file", source: "../shared", destination: "shared"
   config.vm.provision "shell", path: "setup.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
 
