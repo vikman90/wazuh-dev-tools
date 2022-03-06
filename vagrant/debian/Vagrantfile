@@ -5,31 +5,31 @@
 
 require_relative "../shared/shared.rb"
 
+machines = {
+  "bullseye" => {"box" => "generic/debian11", "autostart" => true},
+  "buster" => {"box" => "generic/debian10", "autostart" => false},
+}
+
 Vagrant.configure("2") do |config|
-
-    config.vm.define "bullseye" do |bullseye|
-      bullseye.vm.box = "debian/testing64"
-      bullseye.vm.hostname = "bullseye"
-      bullseye.vm.network "private_network", ip: $hosts[bullseye.vm.hostname]
-    end
-
-    config.vm.define "buster", autostart: false do |buster|
-      buster.vm.box = "debian/buster64"
-      buster.vm.hostname = "buster"
-      buster.vm.network "private_network", ip: $hosts[buster.vm.hostname]
-    end
-
-    config.vm.provision "file", source: "../shared", destination: "shared"
-    config.vm.provision "shell", path: "../shared/setup_deb.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
-
-    config.vm.provider "virtualbox" do |v|
-      v.memory = $memory
-      v.cpus = $cpus
-      v.default_nic_type = "virtio"
-    end
-
-    config.vm.provider "vmware_desktop" do |v|
-      v.vmx["memsize"] = $memory
-      v.vmx["numvcpus"] = $cpus
+  machines.each do |name, vm|
+    config.vm.define name, autostart: vm["autostart"] do |v|
+      v.vm.box = vm["box"]
+      v.vm.hostname = name
+      v.vm.network "private_network", ip: $hosts[name]
     end
   end
+
+  config.vm.provision "file", source: "../shared", destination: "shared"
+  config.vm.provision "shell", path: "../shared/setup_deb.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
+
+  config.vm.provider "virtualbox" do |v|
+    v.memory = $memory
+    v.cpus = $cpus
+    v.default_nic_type = "virtio"
+  end
+
+  config.vm.provider "vmware_desktop" do |v|
+    v.vmx["memsize"] = $memory
+    v.vmx["numvcpus"] = $cpus
+  end
+end

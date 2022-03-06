@@ -5,65 +5,41 @@
 
 require_relative "../shared/shared.rb"
 
+machines = {
+  "impish" => {"box" => "generic/ubuntu2110", "autostart" => true},
+  "hirsute" => {"box" => "generic/ubuntu2104", "autostart" => false},
+  "groovy" => {"box" => "generic/ubuntu2010", "autostart" => false},
+  "focal" => {"box" => "generic/ubuntu2004", "autostart" => false},
+  "eoan" => {"box" => "generic/ubuntu1910", "autostart" => false},
+  "bionic" => {"box" => "generic/ubuntu1804", "autostart" => false},
+  "xenial32" => {"box" => "ubuntu/xenial32", "autostart" => false},
+}
+
 Vagrant.configure("2") do |config|
-    config.vm.define "impish" do |v|
-      v.vm.box = "generic/ubuntu2110"
-      v.vm.hostname = "impish"
-      v.vm.network "private_network", ip: $hosts[v.vm.hostname]
+  machines.each do |name, vm|
+    config.vm.define name, autostart: vm["autostart"] do |v|
+      v.vm.box = vm["box"]
+      v.vm.hostname = name
+      v.vm.network "private_network", ip: $hosts[name]
     end
-
-    config.vm.define "hirsute", autostart: false do |v|
-      v.vm.box = "generic/ubuntu2104"
-      v.vm.hostname = "hirsute"
-      v.vm.network "private_network", ip: $hosts[v.vm.hostname]
-    end
-
-    config.vm.define "groovy", autostart: false do |v|
-      v.vm.box = "generic/ubuntu2010"
-      v.vm.hostname = "groovy"
-      v.vm.network "private_network", ip: $hosts[v.vm.hostname]
-    end
-
-    config.vm.define "focal", autostart: false do |focal|
-      focal.vm.box = "generic/ubuntu2004"
-      focal.vm.hostname = "focal"
-      focal.vm.network "private_network", ip: $hosts[focal.vm.hostname]
-    end
-
-    config.vm.define "eoan", autostart: false do |eoan|
-      eoan.vm.box = "generic/ubuntu1910"
-      eoan.vm.hostname = "eoan"
-      eoan.vm.network "private_network", ip: $hosts[eoan.vm.hostname]
-    end
-
-    config.vm.define "bionic", autostart: false do |bionic|
-      bionic.vm.box = "generic/ubuntu1804"
-      bionic.vm.hostname = "bionic"
-      bionic.vm.network "private_network", ip: $hosts[bionic.vm.hostname]
-    end
-
-    config.vm.define "xenial32", autostart: false do |xenial|
-      xenial.vm.box = "ubuntu/xenial32"
-      xenial.vm.hostname = "xenial32"
-      xenial.vm.network "private_network", ip: $hosts[xenial.vm.hostname]
-    end
-
-    # The vboxsf filesystem is not installed so we can't share folders
-    config.vm.synced_folder ".", "/vagrant", disabled: true
-
-    config.vm.provision "file", source: "../shared", destination: "shared"
-    config.vm.provision "shell", path: "../shared/setup_deb.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
-
-    config.vm.provider "virtualbox" do |v|
-      v.cpus = $cpus
-      v.memory = $memory
-      # v.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
-      v.customize [ "modifyvm", :id, "--uartmode1", "file", File::NULL ]
-    end
-
-    config.vm.provider "vmware_desktop" do |v|
-      v.vmx["memsize"] = $memory
-      v.vmx["numvcpus"] = $cpus
-    end
-
   end
+
+  # The vboxsf filesystem is not installed so we can't share folders
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  config.vm.provision "file", source: "../shared", destination: "shared"
+  config.vm.provision "shell", path: "../shared/setup_deb.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
+
+  config.vm.provider "virtualbox" do |v|
+    v.cpus = $cpus
+    v.memory = $memory
+    # v.customize [ "modifyvm", :id, "--uartmode1", "disconnected" ]
+    v.customize [ "modifyvm", :id, "--uartmode1", "file", File::NULL ]
+  end
+
+  config.vm.provider "vmware_desktop" do |v|
+    v.vmx["memsize"] = $memory
+    v.vmx["numvcpus"] = $cpus
+  end
+
+end

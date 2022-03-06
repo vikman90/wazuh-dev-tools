@@ -5,17 +5,18 @@
 
 require_relative "../shared/shared.rb"
 
-Vagrant.configure("2") do |config|
-  config.vm.define "tumbleweed" do |tumbleweed|
-    tumbleweed.vm.box = "generic/opensuse15"
-    tumbleweed.vm.hostname = "tumbleweed"
-    tumbleweed.vm.network "private_network", ip: $hosts[tumbleweed.vm.hostname]
-  end
+machines = {
+  "tumbleweed" => {"box" => "generic/opensuse15", "autostart" => true},
+  "leap" => {"box" => "generic/opensuse15", "autostart" => false},
+}
 
-  config.vm.define "leap", autostart: false do |leap|
-    leap.vm.box = "generic/opensuse15"
-    leap.vm.hostname = "leap"
-    leap.vm.network "private_network", ip: $hosts[leap.vm.hostname]
+Vagrant.configure("2") do |config|
+  machines.each do |name, vm|
+    config.vm.define name, autostart: vm["autostart"] do |v|
+      v.vm.box = vm["box"]
+      v.vm.hostname = name
+      v.vm.network "private_network", ip: $hosts[name]
+    end
   end
 
   config.vm.provision "file", source: "../shared", destination: "shared"

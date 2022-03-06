@@ -5,29 +5,20 @@
 
 require_relative "../shared/shared.rb"
 
+machines = {
+  "rocky" => {"box" => "bento/rockylinux-8", "autostart" => true},
+  "centos8" => {"box" => "bento/centos-stream-8", "autostart" => false},
+  "centos7" => {"box" => "bento/centos-7", "autostart" => false},
+  "centos6" => {"box" => "bento/centos-6", "autostart" => false},
+}
+
 Vagrant.configure("2") do |config|
-  config.vm.define "rocky" do |v|
-    v.vm.box = "bento/rockylinux-8"
-    v.vm.hostname = "rocky"
-    v.vm.network "private_network", ip: $hosts[v.vm.hostname]
-  end
-
-  config.vm.define "centos8", autostart: false do |centos|
-    centos.vm.box = "bento/centos-stream-8"
-    centos.vm.hostname = "centos8"
-    centos.vm.network "private_network", ip: $hosts[centos.vm.hostname]
-  end
-
-  config.vm.define "centos7", autostart: false do |centos|
-    centos.vm.box = "bento/centos-7"
-    centos.vm.hostname = "centos7"
-    centos.vm.network "private_network", ip: $hosts[centos.vm.hostname]
-  end
-
-  config.vm.define "centos6", autostart: false do |centos|
-    centos.vm.box = "bento/centos-6"
-    centos.vm.hostname = "centos6"
-    centos.vm.network "private_network", ip: $hosts[centos.vm.hostname]
+  machines.each do |name, vm|
+    config.vm.define name, autostart: vm["autostart"] do |v|
+      v.vm.box = vm["box"]
+      v.vm.hostname = name
+      v.vm.network "private_network", ip: $hosts[name]
+    end
   end
 
   config.vm.provision "file", source: "../shared", destination: "shared"
