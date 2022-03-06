@@ -6,7 +6,14 @@
 require_relative "../shared/shared.rb"
 
 machines = {
-  "bullseye" => {"box" => "generic/debian11", "autostart" => true},
+  "impish" => {"box" => "generic/ubuntu2110", "autostart" => true},
+  "hirsute" => {"box" => "generic/ubuntu2104", "autostart" => false},
+  "groovy" => {"box" => "generic/ubuntu2010", "autostart" => false},
+  "focal" => {"box" => "generic/ubuntu2004", "autostart" => false},
+  "eoan" => {"box" => "generic/ubuntu1910", "autostart" => false},
+  "bionic" => {"box" => "generic/ubuntu1804", "autostart" => false},
+  "xenial32" => {"box" => "ubuntu/xenial32", "autostart" => false},
+  "bullseye" => {"box" => "generic/debian11", "autostart" => false},
   "buster" => {"box" => "generic/debian10", "autostart" => false},
 }
 
@@ -19,13 +26,17 @@ Vagrant.configure("2") do |config|
     end
   end
 
+  # The vboxsf filesystem is not installed so we can't share folders
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
   config.vm.provision "file", source: "../shared", destination: "shared"
-  config.vm.provision "shell", path: "../shared/setup_deb.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
+  config.vm.provision "shell", path: "setup.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
 
   config.vm.provider "virtualbox" do |v|
     v.memory = $memory
     v.cpus = $cpus
     v.default_nic_type = "virtio"
+    v.customize [ "modifyvm", :id, "--uartmode1", "file", File::NULL ]
   end
 
   config.vm.provider "vmware_desktop" do |v|
