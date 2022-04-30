@@ -6,8 +6,8 @@
 require_relative "../shared/shared.rb"
 
 machines = {
-  "tumbleweed" => {"box" => "generic/opensuse15", "autostart" => true},
-  "leap" => {"box" => "generic/opensuse15", "autostart" => false},
+  "tumbleweed" => {"box" => "generic/opensuse15", "autostart" => false},
+  "leap" => {"box" => "generic/opensuse15", "autostart" => true},
 }
 
 Vagrant.configure("2") do |config|
@@ -20,7 +20,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.provision "file", source: "../shared", destination: "shared"
-  config.vm.provision "shell", path: "setup.sh", args: "--tumbleweed", env: {"SHARED_DIR" => "/home/vagrant/shared"}, reboot: "yes"
+  config.vm.provision "shell", path: "setup.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}, reboot: "yes"
 
   config.vm.provider "virtualbox" do |v|
     v.memory = $memory
