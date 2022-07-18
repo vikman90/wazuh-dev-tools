@@ -6,15 +6,15 @@
 require_relative "../shared/shared.rb"
 
 machines = {
-  "impish" => {"box" => "generic/ubuntu2110", "autostart" => true},
-  "hirsute" => {"box" => "generic/ubuntu2104", "autostart" => false},
-  "groovy" => {"box" => "generic/ubuntu2010", "autostart" => false},
-  "focal" => {"box" => "generic/ubuntu2004", "autostart" => false},
-  "eoan" => {"box" => "generic/ubuntu1910", "autostart" => false},
-  "bionic" => {"box" => "generic/ubuntu1804", "autostart" => false},
-  "xenial32" => {"box" => "ubuntu/xenial32", "autostart" => false},
-  "bullseye" => {"box" => "generic/debian11", "autostart" => false},
-  "buster" => {"box" => "generic/debian10", "autostart" => false},
+  "impish"    => {"box" => "generic/ubuntu2110", "autostart" => true},
+  "hirsute"   => {"box" => "generic/ubuntu2104", "autostart" => false},
+  "groovy"    => {"box" => "generic/ubuntu2010", "autostart" => false},
+  "focal"     => {"box" => "generic/ubuntu2004", "autostart" => false},
+  "eoan"      => {"box" => "generic/ubuntu1910", "autostart" => false},
+  "bionic"    => {"box" => "generic/ubuntu1804", "autostart" => false},
+  "xenial32"  => {"box" => "ubuntu/xenial32"   , "autostart" => false},
+  "bullseye"  => {"box" => "generic/debian11"  , "autostart" => false},
+  "buster"    => {"box" => "generic/debian10"  , "autostart" => false},
 }
 
 Vagrant.configure("2") do |config|

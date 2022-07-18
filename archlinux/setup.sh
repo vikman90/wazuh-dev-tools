@@ -3,7 +3,7 @@
 # June 4, 2020
 
 set -e
-source shared/shared.sh
+source ../shared/shared.sh
 
 pacman-install() {
     pacman -Syu --noconfirm $@

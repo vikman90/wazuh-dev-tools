@@ -3,7 +3,7 @@
 # February 9, 2020
 
 set -e
-source shared/shared.sh
+source ../shared/shared.sh
 
 # Detect CentOS version
 OS_MAJOR=$(grep -oE '[0-9]+' /etc/centos-release | head -n1)
