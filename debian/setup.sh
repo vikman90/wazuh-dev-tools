@@ -5,7 +5,7 @@
 [ $_ = $0 ] || sourced=0
 
 set -e
-source ../shared/shared.sh
+source shared/shared.sh
 source /etc/os-release
 
 apt-get-install() {

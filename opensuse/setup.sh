@@ -3,7 +3,7 @@
 # February 25, 2022
 
 set -e
-source ../shared/shared.sh
+source shared/shared.sh
 
 setup_tumbleweed() {
     rm /etc/zypp/repos.d/*.repo

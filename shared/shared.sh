@@ -2,7 +2,7 @@
 # Vikman Fernandez-Castro
 # February 9, 2020
 
-source config.sh
+source shared/config.sh
 
 if [ -z "$SHARED_DIR" ]
 then

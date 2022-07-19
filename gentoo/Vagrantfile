@@ -9,7 +9,7 @@ Vagrant.configure("2") do |config|
     config.vm.define "gentoo" do |gentoo|
       gentoo.vm.box = "generic/gentoo"
       gentoo.vm.hostname = "gentoo"
-      gentoo.vm.network "private_network", ip: $hosts[gentoo.vm.hostname]
+      gentoo.vm.network "public_network", ip: $hosts[gentoo.vm.hostname], bridge: "wlp1s0"
     end
 
     # The vboxsf filesystem is not installed so we can't share folders

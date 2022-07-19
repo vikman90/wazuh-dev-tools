@@ -9,7 +9,7 @@ Vagrant.configure("2") do |config|
     config.vm.define "archlinux" do |archlinux|
       archlinux.vm.box = "generic/arch"
       archlinux.vm.hostname = "archlinux"
-      archlinux.vm.network "private_network", ip: $hosts[archlinux.vm.hostname]
+      archlinux.vm.network "public_network", ip: $hosts[archlinux.vm.hostname], bridge: "wlp1s0"
     end
 
     # The vboxsf filesystem is not installed so we can't share folders
@@ -19,9 +19,8 @@ Vagrant.configure("2") do |config|
     config.vm.provision "shell", path: "setup.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
 
     config.vm.provider "virtualbox" do |v|
-      v.cpus = 4
-      v.memory = 2048
+      v.cpus = $cpus
+      v.memory = $memory
       v.default_nic_type = "virtio"
     end
-
-  end
+end
