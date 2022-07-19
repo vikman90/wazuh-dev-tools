@@ -1,7 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-# Vikman Fernandez-Castro
-# February 25, 2022
+
+# OpenSUSE
+# July 18, 2022
 
 require_relative "../shared/shared.rb"
 
@@ -18,6 +19,9 @@ Vagrant.configure("2") do |config|
       v.vm.network "public_network", ip: $hosts[name], bridge: "wlp1s0"
     end
   end
+
+  # The vboxsf filesystem is not installed so we can't share folders
+  config.vm.synced_folder ".", "/vagrant", disabled: true
 
   config.vm.provision "file", source: "../shared", destination: "shared"
   config.vm.provision "shell", path: "setup.sh", args: "--tumbleweed", env: {"SHARED_DIR" => "/home/vagrant/shared"}, reboot: "yes"

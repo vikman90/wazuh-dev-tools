@@ -1,2 +1,3 @@
-# wazuh-dev-tools
-Development toolset for Wazuh
+# Vagrant machines for wazuh
+
+In credit to Vikman Fernandez Castro

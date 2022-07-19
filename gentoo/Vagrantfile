@@ -1,32 +1,39 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-# Vikman Fernandez-Castro
-# July 13, 2020
+
+# Gentoo
+# July 18, 2022
 
 require_relative "../shared/shared.rb"
 
+machines = {
+  "gentoo"  => {"box" => "generic/gentoo", "autostart" => true},
+}
+
 Vagrant.configure("2") do |config|
-    config.vm.define "gentoo" do |gentoo|
-      gentoo.vm.box = "generic/gentoo"
-      gentoo.vm.hostname = "gentoo"
-      gentoo.vm.network "public_network", ip: $hosts[gentoo.vm.hostname], bridge: "wlp1s0"
-    end
-
-    # The vboxsf filesystem is not installed so we can't share folders
-    config.vm.synced_folder ".", "/vagrant", disabled: true
-
-    config.vm.provision "file", source: "../shared", destination: "shared"
-    config.vm.provision "shell", path: "setup.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
-
-    config.vm.provider "virtualbox" do |v|
-      v.cpus = $cpus
-      v.memory = $memory
-      v.default_nic_type = "virtio"
-    end
-
-    config.vm.provider "vmware_desktop" do |v|
-      v.vmx["memsize"] = $memory
-      v.vmx["numvcpus"] = $cpus
-    end
-
+  machines.each do |name, vm|
+    config.vm.define name, autostart: vm["autostart"] do |v|
+      v.vm.box = vm["box"]
+      v.vm.hostname = name
+      v.vm.network "public_network", ip: $hosts[name], bridge: "wlp1s0"      gentoo
+    end  
   end
+
+  # The vboxsf filesystem is not installed so we can't share folders
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  config.vm.provision "file", source: "../shared", destination: "shared"
+  config.vm.provision "shell", path: "setup.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
+
+  config.vm.provider "virtualbox" do |v|
+    v.memory = $memory
+    v.cpus = $cpus
+    v.default_nic_type = "virtio"
+    v.customize ["modifyvm", :id, "--audio", "none"]
+  end
+
+  config.vm.provider "vmware_desktop" do |v|
+    v.vmx["memsize"] = $memory
+    v.vmx["numvcpus"] = $cpus
+  end
+end

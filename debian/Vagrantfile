@@ -1,7 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-# Vikman Fernandez-Castro
-# February 8, 2020
+
+# Debian
+# July 18, 2022
 
 require_relative "../shared/shared.rb"
 
