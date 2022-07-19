@@ -7,7 +7,7 @@
 require_relative "../shared/shared.rb"
 
 machines = {
-  "agent_windows"        => {"box" => "tefanScherer/windows_2019"                                 , "autostart" => true},
+  "agent-windows"        => {"box" => "StefanScherer/windows_2019"                                , "autostart" => true},
   "windows-10"           => {"box" => "gusztavvargadr/windows-10"                                 , "autostart" => false},
   "windows-11"           => {"box" => "gusztavvargadr/windows-11"                                 , "autostart" => false},
   "windows-server-2012"  => {"box" => "addle/windows-server-2012-r2"                              , "autostart" => false},
