@@ -32,7 +32,7 @@ setup_nfs() {
     # firewall-cmd --add-service=nfs --permanent
     # firewall-cmd --reload
 
-    echo "/ 192.168.33.1(rw,no_subtree_check,insecure,all_squash,anonuid=0,anongid=0)" > /etc/exports
+    echo "/ 192.168.0.1(rw,no_subtree_check,insecure,all_squash,anonuid=0,anongid=0)" > /etc/exports
     exportfs -ra
 }
 
