@@ -6,4 +6,4 @@ TIMEZONE="America/Buenos_Aires"
 
 GIT_NAME="sebasfalcone"
 GIT_EMAIL="sebastian.falconr@wazuh.com"
-GIT_SIGNINGKEY="EC06321D0E8C8C59"
+GIT_SIGNINGKEY="3092A1B894CF8BFA"

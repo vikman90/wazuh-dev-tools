@@ -7,15 +7,15 @@
 require_relative "../shared/shared.rb"
 
 machines = {
-  "impish"    => {"box" => "generic/ubuntu2110", "autostart" => true},
-  "hirsute"   => {"box" => "generic/ubuntu2104", "autostart" => false},
-  "groovy"    => {"box" => "generic/ubuntu2010", "autostart" => false},
-  "focal"     => {"box" => "generic/ubuntu2004", "autostart" => false},
-  "eoan"      => {"box" => "generic/ubuntu1910", "autostart" => false},
-  "bionic"    => {"box" => "generic/ubuntu1804", "autostart" => false},
-  "xenial32"  => {"box" => "ubuntu/xenial32"   , "autostart" => false},
-  "bullseye"  => {"box" => "generic/debian11"  , "autostart" => false},
-  "buster"    => {"box" => "generic/debian10"  , "autostart" => false},
+  "debian11"  => {"box" => "debian/bullseye64", "autostart" => true },
+  "debian10"  => {"box" => "debian/buster64"  , "autostart" => false},
+  "debian9"   => {"box" => "debian/stretch64" , "autostart" => false},
+  "debian8"   => {"box" => "debian/jessie64"  , "autostart" => false},
+  "ubuntu22"  => {"box" => "ubuntu/jammy64"   , "autostart" => true },
+  "ubuntu20"  => {"box" => "generic/focal64"  , "autostart" => false},
+  "ubuntu18"  => {"box" => "ubuntu/bionic64"  , "autostart" => false},
+  "ubuntu16"  => {"box" => "ubuntu/xenial64"  , "autostart" => false},
+  "ubuntu14"  => {"box" => "ubuntu/trusty64"  , "autostart" => false},
 }
 
 Vagrant.configure("2") do |config|
@@ -23,8 +23,7 @@ Vagrant.configure("2") do |config|
     config.vm.define name, autostart: vm["autostart"] do |v|
       v.vm.box = vm["box"]
       v.vm.hostname = name
-      v.vm.network "public_network", ip: $hosts[name], bridge: "wlp1s0"
-      v.vm.network "forwarded_port", guest:443, host:443
+      v.vm.network "private_network", ip: $hosts[name]
     end
   end
 

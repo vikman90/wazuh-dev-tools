@@ -20,7 +20,7 @@ Vagrant.configure("2") do |config|
         config.vm.define name, autostart: vm["autostart"] do |v|
             v.vm.box = vm["box"]
             v.vm.hostname = name
-            v.vm.network "public_network", ip: $hosts[name], bridge: "wlp1s0"
+            v.vm.network "private_network", ip: $hosts[name]
         end
     end
     
