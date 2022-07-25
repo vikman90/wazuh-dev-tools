@@ -1,6 +1,8 @@
 #/bin/sh
-# Vikman Fernandez-Castro
-# February 25, 2022
+# OpenSuse
+# July 25, 2022
+
+[ $_ = $0 ] || sourced=0
 
 set -e
 source shared/shared.sh
@@ -22,30 +24,26 @@ setup_packages() {
 
     # Shell tools
     zypper -n install wget gdb nano git tcpdump strace valgrind psmisc
+
+    if [ "$(hostname)" == "tumbleweed" ]
+    then
+        setup_tumbleweed
+    fi    
 }
 
 setup_nfs() {
-    zypper -n in nfs-kernel-server
-    systemctl enable nfs-server
-    # systemctl restart nfs-server
-
-    # firewall-cmd --add-service=nfs --permanent
-    # firewall-cmd --reload
-
-    echo "/ 192.168.0.1(rw,no_subtree_check,insecure,all_squash,anonuid=0,anongid=0)" > /etc/exports
-    exportfs -ra
+    >&2 echo TODO: setup_nfs
+    return
 }
 
-if [ "$(hostname)" = "tumbleweed" ]
+if [ -z "$sourced" ]
 then
-    setup_tumbleweed
+    setup_packages
+    setup_files
+    setup_git
+    setup_shell
+    setup_ssh
+    setup_timezone
+    setup_nfs
+    setup_cleanup
 fi
-
-setup_packages
-setup_files
-setup_git
-setup_shell
-setup_ssh
-setup_timezone
-setup_nfs
-setup_cleanup

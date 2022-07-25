@@ -1,6 +1,8 @@
 #/bin/sh
-# Vikman Fernandez-Castro
-# February 9, 2020
+# Redhat
+# July 25, 2022
+
+[ $_ = $0 ] || sourced=0
 
 set -e
 source shared/shared.sh
@@ -38,7 +40,6 @@ setup_packages() {
     fi
 
     # CMake >= 3.20
-
     if [ $OS_MAJOR -ge 8 ]
     then
         yum-install cmake
@@ -47,59 +48,16 @@ setup_packages() {
         sh cmake.sh --skip-license --prefix=/usr/local
         rm cmake.sh
     fi
-
 }
 
-setup_wazuh_repo() {
-    cat > /etc/yum.repos.d/wazuh.repo <<\EOF
-[wazuh_repo]
-gpgcheck=1
-gpgkey=https://packages.wazuh.com/key/GPG-KEY-WAZUH
-enabled=1
-name=Wazuh repository
-baseurl=https://packages.wazuh.com/4.x/yum/
-protect=1
-EOF
-}
-
-setup_selinux() {
-    if [ $OS_MAJOR = 6 ]
-    then
-        semanage fcontext -a -t ssh_home_t /root/.ssh
-        restorecon -R -v /root/.ssh
-    fi
-}
-
-setup_nfs() {
-    yum-install nfs-utils
-
-    if command -v systemctl > /dev/null
-    then
-        systemctl enable nfs-server
-        systemctl start nfs-server
-    else
-        chkconfig nfs on
-        service nfs start
-    fi
-
-    echo "/ 192.168.0.1(rw,no_subtree_check,insecure,all_squash,anonuid=0,anongid=0)" > /etc/exports
-    exportfs -ra
-
-    # Firewall
-
-    # firewall-cmd --permanent --zone=public --add-service=nfs
-    # firewall-cmd --permanent --zone=public --add-service=mountd
-    # firewall-cmd --permanent --zone=public --add-service=rpc-bind
-    # firewall-cmd --reload
-}
-
-setup_packages
-setup_wazuh_repo
-setup_files
-setup_git
-setup_shell
-setup_ssh
-setup_selinux
-setup_timezone
-setup_nfs
-setup_cleanup
+if [ -z "$sourced" ]
+then
+    setup_packages
+    setup_files
+    setup_git
+    setup_shell
+    setup_ssh
+    setup_timezone
+    setup_nfs
+    setup_cleanup
+fi

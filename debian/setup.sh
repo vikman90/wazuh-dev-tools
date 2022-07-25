@@ -1,6 +1,6 @@
 #/bin/sh
-# Vikman Fernandez-Castro
-# February 8, 2020
+# Debian
+# July 25, 2022
 
 [ $_ = $0 ] || sourced=0
 
@@ -37,37 +37,18 @@ setup_packages() {
     apt-get-install gdb valgrind net-tools psmisc tcpdump sqlite3 netcat-openbsd strace glibc-doc python3 python3-pip
 }
 
-setup_cmocka_win() {
-    git clone -b stable-1.1 https://git.cryptomilk.org/projects/cmocka.git
-    sed -Ei 's/(BUILD_SHARED_LIBS .+) ON/\1 OFF/' cmocka/DefineOptions.cmake
-    mkdir cmocka/build
-    cd cmocka/build
-    cmake -DCMAKE_C_COMPILER=i686-w64-mingw32-gcc -DCMAKE_C_LINK_EXECUTABLE=i686-w64-mingw32-ld -DCMAKE_INSTALL_PREFIX=/usr/i686-w64-mingw32/ -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_BUILD_TYPE=Release ..
-    make
-    make install
-    cd ../..
-    rm -r cmocka
-}
-
-setup_wazuh_repo() {
-    curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key-add
-    echo "deb https://packages.wazuh.com/4.x/apt/ stable main" > /etc/apt/sources.list.d/wazuh.list
-}
-
 setup_nfs() {
     apt-get-install nfs-kernel-server
 
     systemctl enable rpc-statd
     systemctl start rpc-statd
-    echo "/ 192.168.0.1(rw,no_subtree_check,insecure,all_squash,anonuid=0,anongid=0)" >> /etc/exports
+    echo "/ 192.168.56.1(rw,no_subtree_check,insecure,all_squash,anonuid=0,anongid=0)" >> /etc/exports
     exportfs -ra
 }
 
 if [ -z "$sourced" ]
 then
     setup_packages
-    setup_cmocka_win
-    setup_wazuh_repo
     setup_files
     setup_git
     setup_shell

@@ -7,12 +7,10 @@
 require_relative "../shared/shared.rb"
 
 machines = {
-  "agent-windows"        => {"box" => "StefanScherer/windows_2019"                                , "autostart" => true},
-  "windows-10"           => {"box" => "gusztavvargadr/windows-10"                                 , "autostart" => false},
-  "windows-11"           => {"box" => "gusztavvargadr/windows-11"                                 , "autostart" => false},
-  "windows-server-2012"  => {"box" => "addle/windows-server-2012-r2"                              , "autostart" => false},
-  "windows-server-2008"  => {"box" => "galexshd/windows_2008_r2_virtualbox"                       , "autostart" => false},
-  "windows-server-2003"  => {"box" => "therealslimpagey/Windows_Server_2003_Enterprise_R2_puppet" , "autostart" => false},
+  "windows-server-2022"  => {"box" => "gusztavvargadr/windows-server"               , "autostart" => true},
+  "windows-server-2019"  => {"box" => "gusztavvargadr/windows-server-2019-standard" , "autostart" => false},
+  "windows-11"           => {"box" => "gusztavvargadr/windows-11"                   , "autostart" => false},
+  "windows-10"           => {"box" => "gusztavvargadr/windows-10"                   , "autostart" => false},
 }
   
 Vagrant.configure("2") do |config|

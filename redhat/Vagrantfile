@@ -7,9 +7,9 @@
 require_relative "../shared/shared.rb"
 
 machines = {
-  "centos8" => {"box" => "centos/8"         , "autostart" => false},
+  "centos8" => {"box" => "centos/8"       , "autostart" => true},
   "centos7" => {"box" => "centos/7"       , "autostart" => false},
-  "centos6" => {"box" => "bento/centos-6"       , "autostart" => false},
+  "centos6" => {"box" => "bento/centos-6" , "autostart" => false},
 }
 
 Vagrant.configure("2") do |config|
