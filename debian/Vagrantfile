@@ -12,7 +12,7 @@ machines = {
   "debian9"   => {"box" => "debian/stretch64" , "autostart" => false},
   "debian8"   => {"box" => "debian/jessie64"  , "autostart" => false},
   "ubuntu22"  => {"box" => "ubuntu/jammy64"   , "autostart" => true },
-  "ubuntu20"  => {"box" => "generic/focal64"  , "autostart" => false},
+  "ubuntu20"  => {"box" => "ubuntu/focal64"   , "autostart" => false},
   "ubuntu18"  => {"box" => "ubuntu/bionic64"  , "autostart" => false},
   "ubuntu16"  => {"box" => "ubuntu/xenial64"  , "autostart" => false},
   "ubuntu14"  => {"box" => "ubuntu/trusty64"  , "autostart" => false},
