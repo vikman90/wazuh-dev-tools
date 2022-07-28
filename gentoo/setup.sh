@@ -11,11 +11,6 @@ setup_packages() {
     emerge dev-vcs/git nano
 }
 
-setup_nfs() {
-    >&2 echo TODO: setup_nfs
-    return
-}
-
 if [ -z "$sourced" ]
 then
     setup_packages
@@ -24,6 +19,5 @@ then
     setup_shell
     setup_ssh
     setup_timezone
-    setup_nfs
     setup_cleanup
 fi

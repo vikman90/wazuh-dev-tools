@@ -19,21 +19,18 @@ setup_tumbleweed() {
 }
 
 setup_packages() {
-    # Wazuh required packages
-    zypper -n install make gcc gcc-c++ automake libtool cmake curl openssl hostname
-
-    # Shell tools
-    zypper -n install wget gdb nano git tcpdump strace valgrind psmisc
+    zypper -n install apt-transport-https
+    zypper -n install nano
+    zypper -n install curl
+    zypper -n install wget
+    zypper -n install git
+    zypper -n install net-tools
+    zypper -n install gnupg2
 
     if [ "$(hostname)" == "tumbleweed" ]
     then
         setup_tumbleweed
     fi    
-}
-
-setup_nfs() {
-    >&2 echo TODO: setup_nfs
-    return
 }
 
 if [ -z "$sourced" ]
@@ -44,6 +41,5 @@ then
     setup_shell
     setup_ssh
     setup_timezone
-    setup_nfs
     setup_cleanup
 fi

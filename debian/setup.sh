@@ -12,48 +12,42 @@ apt-get-install() {
     DEBIAN_FRONTEND='noninteractive' apt-get install -y $@
 }
 
+apt-get-upgrade() {
+    DEBIAN_FRONTEND='noninteractive' apt-get upgrade -y
+}
+
 apt-key-add() {
     APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add -
 }
 
 setup_packages() {
-    dpkg --add-architecture i386
     apt-get update
-
-    # Package installer dependencies
+    
     apt-get-install apt-transport-https
+    apt-get-install nano
+    apt-get-install curl
+    apt-get-install wget
+    apt-get-install git
+    apt-get-install net-tools
+    apt-get-install gnupg2
 
-    # Wazuh required packages
-    apt-get-install make gcc curl git automake autoconf libtool gcc-mingw-w64-i686 g++-mingw-w64-i686 nsis cmake libcmocka-dev lcov wine32 cppcheck astyle
-
-    if [ "$VERSION_CODENAME" = "xenial" ]
-    then
-        apt-get-install policycoreutils clang
-    else
-        apt-get-install policycoreutils-python-utils clang-tools
-    fi
-
-    # Shell tools
-    apt-get-install gdb valgrind net-tools psmisc tcpdump sqlite3 netcat-openbsd strace glibc-doc python3 python3-pip
+    apt-get-upgrade
 }
 
-setup_nfs() {
-    apt-get-install nfs-kernel-server
-
-    systemctl enable rpc-statd
-    systemctl start rpc-statd
-    echo "/ 192.168.56.1(rw,no_subtree_check,insecure,all_squash,anonuid=0,anongid=0)" >> /etc/exports
-    exportfs -ra
+setup_wazuh_repo() {
+    curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key-add
+    echo "deb https://packages.wazuh.com/4.x/apt/ stable main" > /etc/apt/sources.list.d/wazuh.list
 }
+
 
 if [ -z "$sourced" ]
 then
     setup_packages
+    setup_wazuh_repo
     setup_files
     setup_git
     setup_shell
     setup_ssh
     setup_timezone
-    setup_nfs
     setup_cleanup
 fi

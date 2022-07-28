@@ -13,22 +13,13 @@ pacman-install() {
 }
 
 setup_packages() {
-    # Wazuh required packages
-    pacman-install make gcc cmake automake autoconf libtool cmocka
+    pacman -Syy
 
-    # Shell tools
-    pacman-install nano gdb valgrind git tcpdump wget net-tools python
-}
-
-setup_nfs() {
-    pacman-install nfs-utils
-
-    echo "/ 192.168.56.1(rw,no_subtree_check,insecure,all_squash,anonuid=0,anongid=0)" >> /etc/exports
-    exportfs -rav
-
-    systemctl enable nfs-server.service
-
-    >&2 echo "INFO: You need to reboot in order to enable NFS."
+    pacman-install nano
+    pacman-install curl
+    pacman-install wget
+    pacman-install git
+    pacman-install net-tools
 }
 
 if [ -z "$sourced" ]
@@ -39,6 +30,5 @@ then
     setup_shell
     setup_ssh
     setup_timezone
-    setup_nfs
     setup_cleanup
 fi 
