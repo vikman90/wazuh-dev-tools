@@ -19,7 +19,6 @@ setup_tumbleweed() {
 }
 
 setup_packages() {
-    zypper -n install apt-transport-https
     zypper -n install nano
     zypper -n install curl
     zypper -n install wget

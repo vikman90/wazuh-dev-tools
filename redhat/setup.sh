@@ -27,7 +27,6 @@ setup_packages() {
     fi
 
     # Wazuh required packages
-    yum-install apt-transport-https
     yum-install nano
     yum-install curl
     yum-install wget
