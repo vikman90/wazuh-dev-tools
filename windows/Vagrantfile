@@ -26,7 +26,7 @@ Vagrant.configure("2") do |config|
     #config.vm.provision "shell", path: "setup.sh", args: "--tumbleweed", env: {"SHARED_DIR" => "../shared"}, reboot: "yes"
     
     config.vm.provider "virtualbox" do |v|
-        v.memory = $memory
+        v.memory = $agentMemory
         v.cpus = $cpus
         v.default_nic_type = "virtio"
         v.gui = true

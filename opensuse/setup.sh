@@ -19,17 +19,14 @@ setup_tumbleweed() {
 }
 
 setup_packages() {
+    [ "$(hostname)" == "tumbleweed" ] && setup_tumbleweed 
+
     zypper -n install nano
     zypper -n install curl
     zypper -n install wget
     zypper -n install git
     zypper -n install net-tools
-    zypper -n install gnupg2
-
-    if [ "$(hostname)" == "tumbleweed" ]
-    then
-        setup_tumbleweed
-    fi    
+    #zypper -n install gnupg2    
 }
 
 if [ -z "$sourced" ]
