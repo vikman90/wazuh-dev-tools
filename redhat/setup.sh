@@ -8,7 +8,7 @@ set -e
 source shared/shared.sh
 
 # Detect CentOS version
-OS_MAJOR=$(grep -oE '[0-9]+' /etc/centos-release | head -n1)
+RELEASE_VERSION=$(grep -oE '[0-9]+' /etc/centos-release | head -n1)
 
 if [ -z "$OS_MAJOR" ]
 then
@@ -21,10 +21,8 @@ yum-install() {
 }
 
 setup_packages() {
-    if [ $OS_MAJOR -ge 8 ]
-    then
-        yum config-manager --set-enabled powertools
-    fi
+    [ $RELEASE_VERSION -eq 9 ] && yum config-manager --set-enabled crb
+    [ $RELEASE_VERSION -eq 8 ] && yum config-manager --set-enabled powertools
 
     # Wazuh required packages
     yum-install nano
