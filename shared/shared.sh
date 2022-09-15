@@ -56,12 +56,7 @@ setup_shell() {
 }
 
 setup_timezone() {
-    if command -v timedatectl > /dev/null
-    then
-        timedatectl set-timezone $TIMEZONE
-    else
-        ln -fs /usr/share/zoneinfo/$TIMEZONE /etc/localtime
-    fi
+    timedatectl set-timezone $TIMEZONE
 }
 
 setup_cleanup() {
