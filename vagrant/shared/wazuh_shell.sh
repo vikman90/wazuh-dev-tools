@@ -2,14 +2,14 @@
 # Wazuh Inc.
 # May 22, 2016
 #
-# Rev 10
+# Rev 11
 #
 # Install:
 # Go to the directory that contains this file and run:
 # cp wazuh_shell.sh ~/.wazuh.sh && echo -e '\n. $HOME/.wazuh.sh' >> ~/.bashrc && . ~/.bashrc
 
 # Set these values at your convenience
-THREADS=2
+THREADS=4
 GIT_DEPTH=128
 
 if [ -z "$THREADS" ]
@@ -41,9 +41,11 @@ alias make-agent-test="make-agent-debug TEST=1"
 alias make-server-test="make-server-debug TEST=1"
 alias make-local-test="make-local-debug TEST=1"
 alias make-winagent-test="make-winagent-debug TEST=1"
+alias make-deps="make deps -j$THREADS"
+alias make-deps-winagent="make deps TARGET=winagent -j$THREADS"
 
 alias install-manager='USER_LANGUAGE="en" USER_NO_STOP="y" USER_INSTALL_TYPE="server" USER_DIR="/var/ossec" USER_ENABLE_EMAIL="n" USER_ENABLE_SYSCHECK="y" USER_ENABLE_ROOTCHECK="y" USER_WHITE_LIST="n" USER_ENABLE_SYSLOG="y" USER_ENABLE_AUTHD="y" USER_UPDATE="y" USER_AUTO_START="n" ./install.sh'
-alias install-agent='USER_LANGUAGE="en" USER_NO_STOP="y" USER_INSTALL_TYPE="agent" USER_DIR="/var/ossec" USER_AGENT_SERVER_IP="groovy" USER_ENABLE_SYSCHECK="y" USER_ENABLE_ROOTCHECK="y" USER_ENABLE_ACTIVE_RESPONSE="y" USER_CA_STORE="n" USER_UPDATE="y" ./install.sh'
+alias install-agent='USER_LANGUAGE="en" USER_NO_STOP="y" USER_INSTALL_TYPE="agent" USER_DIR="/var/ossec" USER_AGENT_SERVER_IP="manager" USER_ENABLE_SYSCHECK="y" USER_ENABLE_ROOTCHECK="y" USER_ENABLE_ACTIVE_RESPONSE="y" USER_CA_STORE="n" USER_UPDATE="y" ./install.sh'
 
 alias make-test="make clean && make-server && make clean-internals && make-agent && make clean-internals && make-local && make clean && make-winagent && make clean"
 alias make-docker="make SOURCE=$HOME/ossec-wazuh JOBS=$THREADS"
@@ -70,7 +72,7 @@ alias nano-internal='nano /var/ossec/etc/internal_options.conf'
 alias nano-local-internal='nano /var/ossec/etc/local_internal_options.conf'
 
 alias ossec-ssl="openssl req -x509 -batch -nodes -days 365 -newkey rsa:2048 -keyout /var/ossec/etc/sslmanager.key -out /var/ossec/etc/sslmanager.cert -subj \"/C=US/ST=CA/O=Wazuh\""
-alias ossec-uninstall='ossec_uninstall'
+alias wazuh-uninstall='wazuh_uninstall'
 
 alias valgrind="valgrind --leak-check=full --num-callers=20 --track-origins=yes"
 alias valgrind-fds="valgrind --track-fds=yes --leak-check=full --num-callers=20 --track-origins=yes"
@@ -80,10 +82,15 @@ alias docker-rmi="docker rmi -f \$(docker images | awk '/^<none>/ {print \$3}') 
 alias docker-run="docker run -it --rm"
 alias watch-doc="make clean && make -j$THREADS html && while true; do inotifywait -re CLOSE_WRITE source; make -j$THREADS html; done"
 alias vagrant-halt='vagrant global-status | grep running | cut -d" " -f1 | while read i; do vagrant halt $i; done'
-alias scan-view='scan-view /tmp/scan-build-* --host 0.0.0.0 --port 80 --allow-all-hosts --no-browser'
-alias scan-build='find /tmp -name "scan-build-*" -exec rm -r {} +; scan-build make -j$THREADS TARGET=server DEBUG=yes'
-alias unit-tests='make clean-internals && make-server-test && cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=server .. && make clean && make -j$THREADS && make test'
+alias scan-build-view='scan-view /tmp/scan-build-* --host 0.0.0.0 --port 80 --allow-all-hosts --no-browser'
+alias scan-build-server='find /tmp -name "scan-build-*" -exec rm -r {} +; scan-build make -j$THREADS TARGET=server DEBUG=yes'
+alias unit-tests-server='make clean-internals && make-server-test && cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=server .. && make -j$THREADS && ctest'
+alias unit-tests-agent='make clean-internals && make-agent-test && cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=agent .. && make -j$THREADS && ctest'
+alias unit-tests-winagent='make clean-internals && make-winagent-test && cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=winagent -DCMAKE_TOOLCHAIN_FILE=../Toolchain-win32.cmake .. && make -j$THREADS && WINEPATH=/usr/i686-w64-mingw32/lib\;$(dirname $(dirname $(pwd))) ctest'
 alias wazuh-api='curl -w\\n -sk -H "Authorization: Bearer $(curl -u wazuh:wazuh -sk -X GET "https://localhost:55000/security/user/authenticate?raw=true")"'
+alias git-log='git log --oneline --graph'
+alias git-push='git push --set-upstream origin `git rev-parse --abbrev-ref HEAD`'
+alias git-pull='git pull --depth $GIT_DEPTH'
 
 git-clone-wazuh() {
     if [ -n "$1" ]
@@ -98,7 +105,7 @@ git-clone-wazuh() {
 }
 
 git-add-branches() {
-    git remote set-branches --add origin $@ && git fetch --depth $GIT_DEPTH
+    git remote set-branches --add origin $@ && git fetch --depth $GIT_DEPTH origin $@
 }
 
 function sgrep() {
@@ -125,7 +132,7 @@ mkcd() {
     mkdir -p $1 && cd $1
 }
 
-ossec_uninstall() {
+wazuh_uninstall() {
     OSSEC_INIT="/etc/ossec-init.conf"
 
     # Try to get the installation directory
@@ -146,6 +153,7 @@ ossec_uninstall() {
 
     # Stop daemons
     $DIRECTORY/bin/ossec-control stop 2> /dev/null
+    $DIRECTORY/bin/wazuh-control stop 2> /dev/null
 
     # Remove files and service artifacts
     rm -rf $DIRECTORY $OSSEC_INIT
@@ -155,11 +163,12 @@ ossec_uninstall() {
     case $(uname) in
     Linux)
         [ -f /etc/rc.local ] && sed -i'' '/ossec-control start/d' /etc/rc.local
-        find /etc/{init.d,rc*.d} -name "*wazuh" | xargs rm -f
+        find /etc/{init.d,rc*.d} -name "*wazuh*" | xargs rm -f
 
         if pidof systemd > /dev/null
         then
             find /etc/systemd/system -name "wazuh*" | xargs rm -f
+            find /usr/lib/systemd/system -name "wazuh*" | xargs rm -f
             systemctl daemon-reload
         fi
         ;;
@@ -167,13 +176,13 @@ ossec_uninstall() {
         rm -rf /Library/StartupItems/OSSEC
         ;;
     SunOS)
-        find /etc/{init.d,rc*.d} -name "*wazuh" | xargs rm -f
+        find /etc/{init.d,rc*.d} -name "*wazuh*" | xargs rm -f
         ;;
     HP-UX)
-        find /sbin/{init.d,rc*.d} -name "*wazuh" | xargs rm -f
+        find /sbin/{init.d,rc*.d} -name "*wazuh*" | xargs rm -f
         ;;
     AIX)
-        find /etc/rc.d -name "*wazuh" | xargs rm -f
+        find /etc/rc.d -name "*wazuh*" | xargs rm -f
         ;;
     OpenBSD|NetBSD|FreeBSD|DragonFly)
         sed -i'' '/ossec-control start/d' /etc/rc.local
@@ -190,17 +199,33 @@ ossec_uninstall() {
         dscl . -delete "/Users/ossecm" > /dev/null 2>&1
         dscl . -delete "/Users/ossecr" > /dev/null 2>&1
         dscl . -delete "/Groups/ossec" > /dev/null 2>&1
+        dscl . -delete "/Users/wazuh" > /dev/null 2>&1
+        dscl . -delete "/Groups/wazuh" > /dev/null 2>&1
         ;;
     AIX)
         userdel ossec 2> /dev/null
         userdel ossecm 2> /dev/null
         userdel ossecr 2> /dev/null
         rmgroup ossec 2> /dev/null
+        userdel wazuh 2> /dev/null
+        rmgroup wazuh 2> /dev/null
         ;;
     *)
         userdel ossec 2> /dev/null
         userdel ossecm 2> /dev/null
         userdel ossecr 2> /dev/null
         groupdel ossec 2> /dev/null
+        userdel wazuh 2> /dev/null
+        groupdel wazuh 2> /dev/null
     esac
+}
+
+set-manager() {
+    if [[ ! "$1" =~ ^[0-9\.]+$ ]]
+    then
+        >&2 echo "ERROR: invalid IPv4 address."
+        return 1
+    fi
+
+    sed -Ei '/[^\t]+\tmanager/{s//'$1'\tmanager/;h};${x;/./{x;q0};x;q1}' /etc/hosts || >&2 echo "ERROR: manager not found in /etc/hosts."
 }
