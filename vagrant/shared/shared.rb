@@ -7,4 +7,6 @@ File.open(File.join(File.dirname(__FILE__), 'hosts'), "w") do |f|
     for host, ip in $hosts do
         f.puts "%s\t%s" % [ip, host]
     end
+
+    f.puts "127.0.0.1\tmanager"
 end

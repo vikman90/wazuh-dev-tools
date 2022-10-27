@@ -6,7 +6,8 @@
 require_relative "../shared/shared.rb"
 
 machines = {
-  "impish" => {"box" => "generic/ubuntu2110", "autostart" => true},
+  "jammy" => {"box" => "generic/ubuntu2204", "autostart" => true},
+  "impish" => {"box" => "generic/ubuntu2110", "autostart" => false},
   "hirsute" => {"box" => "generic/ubuntu2104", "autostart" => false},
   "groovy" => {"box" => "generic/ubuntu2010", "autostart" => false},
   "focal" => {"box" => "generic/ubuntu2004", "autostart" => false},
