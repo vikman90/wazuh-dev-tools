@@ -2,7 +2,7 @@
 # Vikman Fernandez-Castro
 # February 8, 2020
 
-[ $_ = $0 ] || sourced=0
+[ "$_" = "$0" ] || sourced=0
 
 set -e
 source shared/shared.sh

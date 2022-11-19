@@ -12,7 +12,7 @@ sudo -E bash -c "source debian/setup.sh; setup_cmocka_win"
 sudo -E bash -c "source debian/setup.sh; setup_wazuh_repo"
 sudo -E bash -c "source debian/setup.sh; setup_files"
 
-source shared/setup_deb.sh
+source debian/setup.sh
 setup_git
 setup_shell
 setup_ssh
