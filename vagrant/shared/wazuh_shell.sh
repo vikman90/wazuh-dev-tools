@@ -2,7 +2,7 @@
 # Wazuh Inc.
 # May 22, 2016
 #
-# Rev 11
+# Rev 12
 #
 # Install:
 # Go to the directory that contains this file and run:
@@ -84,9 +84,9 @@ alias watch-doc="make clean && make -j$THREADS html && while true; do inotifywai
 alias vagrant-halt='vagrant global-status | grep running | cut -d" " -f1 | while read i; do vagrant halt $i; done'
 alias scan-build-view='scan-view /tmp/scan-build-* --host 0.0.0.0 --port 80 --allow-all-hosts --no-browser'
 alias scan-build-server='find /tmp -name "scan-build-*" -exec rm -r {} +; scan-build make -j$THREADS TARGET=server DEBUG=yes'
-alias unit-tests-server='make clean-internals && make-server-test && cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=server .. && make -j$THREADS && ctest'
-alias unit-tests-agent='make clean-internals && make-agent-test && cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=agent .. && make -j$THREADS && ctest'
-alias unit-tests-winagent='make clean-internals && make-winagent-test && cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=winagent -DCMAKE_TOOLCHAIN_FILE=../Toolchain-win32.cmake .. && make -j$THREADS && WINEPATH=/usr/i686-w64-mingw32/lib\;$(dirname $(dirname $(pwd))) ctest'
+alias unit-tests-server='make-server-test && (cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=server .. && make -j$THREADS && ctest)'
+alias unit-tests-agent='make-agent-test && (cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=agent .. && make -j$THREADS && ctest)'
+alias unit-tests-winagent='make-winagent-test && (cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=winagent -DCMAKE_TOOLCHAIN_FILE=../Toolchain-win32.cmake .. && make -j$THREADS && WINEPATH=/usr/i686-w64-mingw32/lib\;$(dirname $(dirname $(pwd))) ctest)'
 alias wazuh-api='curl -w\\n -sk -H "Authorization: Bearer $(curl -u wazuh:wazuh -sk -X GET "https://localhost:55000/security/user/authenticate?raw=true")"'
 alias git-log='git log --oneline --graph'
 alias git-push='git push --set-upstream origin `git rev-parse --abbrev-ref HEAD`'
