@@ -41,7 +41,13 @@ setup_git() {
 }
 
 setup_shell() {
-    cp -rT /etc/skel $HOME
+    if [ -f /etc/skel ]
+    then
+        cp -rT /etc/skel $HOME
+    else
+        echo 'source "$HOME/.bashrc"' >> $HOME/.profile
+    fi
+
     cp $SHARED_DIR/wazuh_shell.sh $HOME/.wazuh_shell
     echo 'source $HOME/.wazuh_shell' >> $HOME/.bashrc
     echo 'export GPG_TTY=$(tty)' >> $HOME/.bashrc
@@ -56,6 +62,8 @@ setup_ssh() {
     cp $SHARED_DIR/private/id_rsa* $HOME/.ssh
     cp $HOME/.ssh/id_rsa.pub $HOME/.ssh/authorized_keys
     chmod 600 $HOME/.ssh/{id_rsa,authorized_keys}
+
+    passwd -u root
 }
 
 setup_timezone() {
