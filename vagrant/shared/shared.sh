@@ -1,4 +1,4 @@
-#/bin/sh
+#! /bin/bash
 # Vikman Fernandez-Castro
 # February 9, 2020
 
