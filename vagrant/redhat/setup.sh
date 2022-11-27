@@ -6,11 +6,11 @@ set -e
 source shared/shared.sh
 
 # Detect CentOS version
-OS_MAJOR=$(grep -oE '[0-9]+' /etc/centos-release | head -n1)
+OS_MAJOR=$(grep -oE '[0-9]+' /etc/redhat-release | head -n1)
 
 if [ -z "$OS_MAJOR" ]
 then
-    >&2 echo "ERROR: cannot parse /etc/centos-release (OS_MAJOR)"
+    >&2 echo "ERROR: cannot parse /etc/redhat-release (OS_MAJOR)"
     exit 1
 fi
 
@@ -19,8 +19,14 @@ yum-install() {
 }
 
 setup_packages() {
-    if [ $OS_MAJOR -ge 8 ]
+    if [ $OS_MAJOR -ge 9 ]
     then
+        # PowerTools for Rocky Linux ≥ 9
+        yum-install dnf-plugins-core
+        dnf config-manager --enable crb
+    elif [ $OS_MAJOR -eq 8 ]
+    then
+        # PowerTools for CentOS ≥ 8
         yum config-manager --set-enabled powertools
     fi
 
@@ -47,7 +53,6 @@ setup_packages() {
         sh cmake.sh --skip-license --prefix=/usr/local
         rm cmake.sh
     fi
-
 }
 
 setup_wazuh_repo() {
