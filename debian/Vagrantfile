@@ -7,16 +7,19 @@
 require_relative "../shared/shared.rb"
 
 machines = {
-  "debian11"  => {"box" => "generic/debian11"   , "autostart" => true },
-  "debian10"  => {"box" => "generic/debian10"   , "autostart" => false},
-  "debian9"   => {"box" => "generic/debian9"    , "autostart" => false},
-  "debian8"   => {"box" => "generic/debian8"    , "autostart" => false},
-  "ubuntu22"  => {"box" => "generic/ubuntu2204" , "autostart" => true },
-  "ubuntu21"  => {"box" => "generic/ubuntu2104" , "autostart" => false},
-  "ubuntu20"  => {"box" => "generic/ubuntu2010" , "autostart" => false},
-  "ubuntu18"  => {"box" => "generic/ubuntu1804" , "autostart" => false},
-  "ubuntu16"  => {"box" => "generic/ubuntu1604" , "autostart" => false},
+  "development" => {"box" => "generic/ubuntu2204" , "autostart" => true },
+  "debian11"    => {"box" => "generic/debian11"   , "autostart" => false},
+  "debian10"    => {"box" => "generic/debian10"   , "autostart" => false},
+  "debian9"     => {"box" => "generic/debian9"    , "autostart" => false},
+  "debian8"     => {"box" => "generic/debian8"    , "autostart" => false},
+  "ubuntu22"    => {"box" => "generic/ubuntu2204" , "autostart" => false},
+  "ubuntu21"    => {"box" => "generic/ubuntu2104" , "autostart" => false},
+  "ubuntu20"    => {"box" => "generic/ubuntu2010" , "autostart" => false},
+  "ubuntu18"    => {"box" => "generic/ubuntu1804" , "autostart" => false},
+  "ubuntu16"    => {"box" => "generic/ubuntu1604" , "autostart" => false},
 }
+
+developmentVM = false
 
 Vagrant.configure("2") do |config|
   machines.each do |name, vm|
@@ -26,8 +29,12 @@ Vagrant.configure("2") do |config|
       v.vm.network "private_network", ip: $hosts[name]
     end
 
+    if (name == "development")
+      developmentVM = true
+    end
+
     config.vm.provider "virtualbox" do |v|
-      if name == "ubuntu22"
+      if ( developmentVM || name == "ubuntu22" )
         v.memory = $managerMemory
       else
         v.memory = $agentMemory
@@ -39,7 +46,7 @@ Vagrant.configure("2") do |config|
     end
 
     config.vm.provider "vmware_desktop" do |v|
-      if name == "ubuntu22"
+      if ( developmentVM || name == "ubuntu22" )
         v.memory = $managerMemory
       else
         v.memory = $agentMemory
@@ -52,5 +59,12 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
   config.vm.provision "file", source: "../shared", destination: "shared"
-  config.vm.provision "shell", path: "setup.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
+  
+  # Provision development machine
+  if developmentVM == true
+    config.vm.provision "shell", path: "setup.sh", args: "development", env: {"SHARED_DIR" => "/home/vagrant/shared"}
+  else
+    config.vm.provision "shell", path: "setup.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
+  end
+
 end

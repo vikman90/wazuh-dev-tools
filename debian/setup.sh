@@ -22,7 +22,7 @@ apt-key-add() {
 
 setup_packages() {
     apt-get update
-    
+
     apt-get-install apt-transport-https
     apt-get-install nano
     apt-get-install curl
@@ -39,6 +39,22 @@ setup_wazuh_repo() {
     echo "deb https://packages.wazuh.com/4.x/apt/ stable main" > /etc/apt/sources.list.d/wazuh.list
 }
 
+setup_dev() {
+    apt-get update
+
+    apt-get-install build-essential 
+    apt-get-install libssl-dev
+    apt-get-install python3
+    apt-get-install python3-pip
+    apt-get-install net-tools
+    apt-get-install gnupg2
+
+    wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+    apt-get-install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
+    sh -c 'echo "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
+    apt-get update update
+    apt-get-install code
+}
 
 if [ -z "$sourced" ]
 then
@@ -50,4 +66,6 @@ then
     setup_ssh
     setup_timezone
     setup_cleanup
+    
+    [ "$1" == "development" ] && echo "Setting up development machine..." && setup_dev    
 fi

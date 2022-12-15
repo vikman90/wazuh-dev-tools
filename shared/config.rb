@@ -30,9 +30,11 @@ $hosts = {
     "windows-11"            => "192.168.56.62",
     "windows-10"            => "192.168.56.63",
 
-    "amzn2"                 => "192.168.56.70"
+    "amzn2"                 => "192.168.56.70",
+
+    "development"           => "192.168.56.80"
 }
 
 $agentMemory = 1024
-$managerMemory = 4096
+$managerMemory = 8192
 $cpus = 8
