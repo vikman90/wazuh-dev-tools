@@ -1,6 +1,6 @@
 # Set of aliases and functions
 # Wazuh Inc.
-# May 22, 2016
+# Aug 2022
 #
 # Rev 10
 #
@@ -9,99 +9,120 @@
 # cp wazuh_shell.sh ~/.wazuh.sh && echo -e '\n. $HOME/.wazuh.sh' >> ~/.bashrc && . ~/.bashrc
 
 # Set these values at your convenience
-THREADS=1
+THREADS=$(nproc)
 GIT_DEPTH=128
-
-if [ -z "$THREADS" ]
-then
-    case $(uname) in
-    
-    Linux)
-        THREADS=$(grep processor /proc/cpuinfo | wc -l)
-        ;;
-
-    Darwin)
-
-        THREADS=$(sysctl -n hw.ncpu)
-        ;;
-
-    *)
-        THREADS=1
-    esac
-fi
 
 export PATH=$PATH:/var/ossec/bin
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/var/ossec/lib
 
-## MAKE WAZUH PROJECT ##
-alias make-agent="make -j$THREADS TARGET=agent"
-alias make-server="make -j$THREADS TARGET=server"
-alias make-local="make -j$THREADS TARGET=local"
-alias make-winagent="make -j$THREADS TARGET=winagent"
-alias make-agent-debug="make-agent DEBUG=yes"
-alias make-server-debug="make-server DEBUG=yes"
-alias make-local-debug="make-local DEBUG=yes"
-alias make-winagent-debug="make-winagent DEBUG=yes"
-alias make-agent-test="make-agent-debug TEST=1"
-alias make-server-test="make-server-debug TEST=1"
-alias make-local-test="make-local-debug TEST=1"
-alias make-winagent-test="make-winagent-debug TEST=1"
+###########################
+### wazuh/wazuh-content ###
+###########################
+git-clone-wazuh-content() {
+    if [ -n "$1" ]
+    then
+        branch="-b $1"
+        folder="wazuh-$1"
+    else
+        folder="wazuh-content"
+    fi
 
-alias install-manager='USER_LANGUAGE="en" USER_NO_STOP="y" USER_INSTALL_TYPE="server" USER_DIR="/var/ossec" USER_ENABLE_EMAIL="n" USER_ENABLE_SYSCHECK="y" USER_ENABLE_ROOTCHECK="y" USER_WHITE_LIST="n" USER_ENABLE_SYSLOG="y" USER_ENABLE_AUTHD="y" USER_UPDATE="y" USER_AUTO_START="n" ./install.sh'
-alias install-agent='USER_LANGUAGE="en" USER_NO_STOP="y" USER_INSTALL_TYPE="agent" USER_DIR="/var/ossec" USER_AGENT_SERVER_IP="groovy" USER_ENABLE_SYSCHECK="y" USER_ENABLE_ROOTCHECK="y" USER_ENABLE_ACTIVE_RESPONSE="y" USER_CA_STORE="n" USER_UPDATE="y" ./install.sh'
+    git clone --recurse-submodules -j$THREADS git@github.com:wazuh/wazuh-content $branch $folder
+    cd $folder
+    rootDir=$(pwd)
+
+    # Compile http-request repo
+    mkdir -p shared/http-request/build/ && cd "$_" && cmake .. -GNinja && ninja
+
+    # Compile main repo
+    cd $rootDir
+    mkdir -p build && cd "$_" && cmake .. -GNinja && ninja    
+}
+
+alias cmake-content="cmake .. -GNinja"
+alias cmake-content-debug="cmake .. -DCMAKE_BUILD_TYPE=Debug"
+
+###################
+### wazuh/wazuh ###
+###################
+
+alias make-agent="make -j$THREADS TARGET=agent"
+alias make-agent-test="make-agent-debug TEST=1"
+alias make-agent-debug="make-agent DEBUG=1"
+
+alias make-server="make -j$THREADS TARGET=server"
+alias make-server-test="make-server-debug TEST=1"
+alias make-server-debug="make-server DEBUG=1"
+
+alias make-local="make -j$THREADS TARGET=local"
+alias make-local-test="make-local-debug TEST=1"
+alias make-local-debug="make-local DEBUG=1"
+
+alias make-winagent="make -j$THREADS TARGET=winagent"
+alias make-winagent-test="make-winagent-debug TEST=1"
+alias make-winagent-debug="make-winagent DEBUG=1"
 
 alias make-test="make clean && make-server && make clean-internals && make-agent && make clean-internals && make-local && make clean && make-winagent && make clean"
 alias make-docker="make SOURCE=$HOME/ossec-wazuh JOBS=$THREADS"
 
-alias ossec-color='perl -pe '\''s-(\d+/\d+/\d+ \d+:\d+:\d+) ([^ \[]+)-\e[1m$1\e[0m \e[96m$2-g;s/(\[\d+\]) (\S+:\d+ at \S+:) /\e[35m$1 \e[90m$2\e[0m /g;s/ (DEBUG:) /\e[94m$&\e[0m/g;s/ (INFO:) /\e[32m$&\e[0m/g;s/ (WARNING:) /\e[33m$&\e[0m/g;s/ (ERROR:) /\e[31m$&\e[0m/g;s/ (CRITICAL)(:) / \e[41m$1\e[49;31m$2\e[0m /g'\'
+alias install-manager='USER_LANGUAGE="en" USER_NO_STOP="y" USER_INSTALL_TYPE="server" USER_DIR="/var/ossec" USER_ENABLE_EMAIL="n" USER_ENABLE_SYSCHECK="y" USER_ENABLE_ROOTCHECK="y" USER_WHITE_LIST="n" USER_ENABLE_SYSLOG="y" USER_ENABLE_AUTHD="y" USER_UPDATE="y" USER_AUTO_START="n" ./install.sh'
 
-case "$TERM" in
-    xterm-color|*-256color) alias tail-ossec='tail -Fn1000 /var/ossec/logs/ossec.log | ossec-color';;
-    *) alias tail-ossec='tail -Fn1000 /var/ossec/logs/ossec.log';;
-esac
+alias install-agent='USER_LANGUAGE="en" USER_NO_STOP="y" USER_INSTALL_TYPE="agent" USER_DIR="/var/ossec" USER_AGENT_SERVER_IP="groovy" USER_ENABLE_SYSCHECK="y" USER_ENABLE_ROOTCHECK="y" USER_ENABLE_ACTIVE_RESPONSE="y" USER_CA_STORE="n" USER_UPDATE="y" ./install.sh'
 
-## PRINT LOGS ##
 alias tail-ossec-json='tail -Fn1000 /var/ossec/logs/ossec.json'
 alias tail-alerts="tail -Fn1000 /var/ossec/logs/alerts/alerts.log"
 alias tail-alerts-json="tail -Fn1000 /var/ossec/logs/alerts/alerts.json"
-alias tail-alerts-json-pretty='tail-alerts-json | while read i; do echo $i | python -m json.tool; done'
+alias tail-alerts-json-pretty='tail-alerts-json | jq'
 alias tail-archives="tail -Fn1000 /var/ossec/logs/archives/archives.log"
 alias tail-archives-json="tail -Fn1000 /var/ossec/logs/archives/archives.json"
 alias tail-cluster="tail -Fn1000 /var/ossec/logs/cluster.log"
 alias tail-api='tail -Fn1000 /var/ossec/logs/api.log'
 
-## EDIT FILES ##
-alias nano-ossec='nano -Yxml /var/ossec/etc/ossec.conf'
-alias nano-sh='nano -Ysh'
+alias nano-ossec='nano /var/ossec/etc/ossec.conf'
 alias nano-internal='nano /var/ossec/etc/internal_options.conf'
 alias nano-local-internal='nano /var/ossec/etc/local_internal_options.conf'
 
 alias ossec-ssl="openssl req -x509 -batch -nodes -days 365 -newkey rsa:2048 -keyout /var/ossec/etc/sslmanager.key -out /var/ossec/etc/sslmanager.cert -subj \"/C=US/ST=CA/O=Wazuh\""
 alias ossec-uninstall='ossec_uninstall'
 
-## TESTING ##
-alias unit-tests='make clean-internals && make-server-test && cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=server .. && make clean && make -j$THREADS && make test'
-alias scan-view='scan-view /tmp/scan-build-* --host 0.0.0.0 --port 80 --allow-all-hosts --no-browser'
-alias scan-build='find /tmp -name "scan-build-*" -exec rm -r {} +; scan-build make -j$THREADS TARGET=server DEBUG=yes'
-
-## VALGRIND ##
 alias valgrind="valgrind --leak-check=full --num-callers=20 --track-origins=yes"
 alias valgrind-fds="valgrind --track-fds=yes --leak-check=full --num-callers=20 --track-origins=yes"
 alias valgrind-all="valgrind --track-fds=yes --leak-check=full --show-leak-kinds=all --num-callers=20 --track-origins=yes"
 
-## VAGRANT ##
-alias vagrant-halt='vagrant global-status | grep running | cut -d" " -f1 | while read i; do vagrant halt $i; done'
-
-## DOCKER ##
 alias docker-rm="docker rm -f \$(docker ps -aq) 2> /dev/null"
 alias docker-rmi="docker rmi -f \$(docker images | awk '/^<none>/ {print \$3}') 2> /dev/null"
 alias docker-run="docker run -it --rm"
+alias watch-doc="make clean && make -j$THREADS html && while true; do inotifywait -re CLOSE_WRITE source; make -j$THREADS html; done"
 
+alias vagrant-halt='vagrant global-status | grep running | cut -d" " -f1 | while read i; do vagrant halt $i; done'
+
+alias scan-view='scan-view /tmp/scan-build-* --host 0.0.0.0 --port 80 --allow-all-hosts --no-browser'
+alias scan-build='find /tmp -name "scan-build-*" -exec rm -r {} +; scan-build make -j$THREADS TARGET=server DEBUG=yes'
+
+alias unit-tests='make clean-internals && make-server-test && cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=server .. && make clean && make -j$THREADS && make test'
 
 alias wazuh-api='curl -w\\n -sk -H "Authorization: Bearer $(curl -u wazuh:wazuh -sk -X GET "https://localhost:55000/security/user/authenticate?raw=true")"'
 
+alias wazuh-manager-restart='sudo systemctl restart wazuh-manager'
+alias wazuh-manager-status='sudo systemctl status wazuh-manager'
+alias wazuh-manager-start='sudo systemctl start wazuh-manager'
+alias wazuh-manager-stop='sudo systemctl stop wazuh-manager'
 
-## FUNCTIONS ##
+alias wazuh-indexer-restart='sudo systemctl restart wazuh-indexer'
+alias wazuh-indexer-status='sudo systemctl status wazuh-indexer'
+alias wazuh-indexer-start='sudo systemctl start wazuh-indexer'
+alias wazuh-indexer-stop='sudo systemctl stop wazuh-indexer'
+
+alias wazuh-dashboard-restart='sudo systemctl restart wazuh-dashboard'
+alias wazuh-dashboard-status='sudo systemctl status wazuh-dashboard'
+alias wazuh-dashboard-start='sudo systemctl start wazuh-dashboard'
+alias wazuh-dashboard-stop='sudo systemctl stop wazuh-dashboard'
+
+alias wazuh-server-restart='wazuh-dashboard-restart ; wazuh-indexer-restart ; wazuh-manager-restart'
+alias wazuh-server-start='wazuh-dashboard-start ; wazuh-indexer-start ; wazuh-manager-start'
+alias wazuh-server-stop='wazuh-dashboard-stop ; wazuh-indexer-stop ; wazuh-manager-stop'
+alias wazuh-server-status='systemctl list-unit-files wazuh*'
+
 
 git-clone-wazuh() {
     if [ -n "$1" ]
@@ -113,22 +134,11 @@ git-clone-wazuh() {
     fi
 
     git clone git@github.com:wazuh/wazuh --depth $GIT_DEPTH $branch $folder
+    cd $folder
 }
 
 git-add-branches() {
     git remote set-branches --add origin $@ && git fetch --depth $GIT_DEPTH
-}
-
-function sgrep() {
-    if [ "$2" = "" ]; then
-        egrep -IRn "$1" .
-    else
-        egrep -IRn "$1" `find . -name "$2"`
-    fi
-}
-
-function oc() {
-    $@ 2>&1 | ossec-color
 }
 
 function compile() {
@@ -137,10 +147,6 @@ function compile() {
 
 function debug() {
     gcc -pipe -g -Wall -Wextra -o $1 $1.c ${@:2}
-}
-
-mkcd() {
-    mkdir -p $1 && cd $1
 }
 
 ossec_uninstall() {
@@ -181,27 +187,21 @@ ossec_uninstall() {
             systemctl daemon-reload
         fi
         ;;
-
     Darwin)
         rm -rf /Library/StartupItems/OSSEC
         ;;
-
     SunOS)
         find /etc/{init.d,rc*.d} -name "*wazuh" | xargs rm -f
         ;;
-
     HP-UX)
         find /sbin/{init.d,rc*.d} -name "*wazuh" | xargs rm -f
         ;;
-
     AIX)
         find /etc/rc.d -name "*wazuh" | xargs rm -f
         ;;
-
     OpenBSD|NetBSD|FreeBSD|DragonFly)
         sed -i'' '/ossec-control start/d' /etc/rc.local
         ;;
-
     *)
         echo "ERROR: uname '$(uname)' not recognized. Could not remove service."
     esac
@@ -215,14 +215,12 @@ ossec_uninstall() {
         dscl . -delete "/Users/ossecr" > /dev/null 2>&1
         dscl . -delete "/Groups/ossec" > /dev/null 2>&1
         ;;
-
     AIX)
         userdel ossec 2> /dev/null
         userdel ossecm 2> /dev/null
         userdel ossecr 2> /dev/null
         rmgroup ossec 2> /dev/null
         ;;
-        
     *)
         userdel ossec 2> /dev/null
         userdel ossecm 2> /dev/null
