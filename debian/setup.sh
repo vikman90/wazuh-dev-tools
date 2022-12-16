@@ -42,17 +42,15 @@ setup_wazuh_repo() {
 setup_dev() {
     apt-get update
 
-    apt-get-install build-essential 
+    apt-get-install build-essential
     apt-get-install libssl-dev
     apt-get-install python3
     apt-get-install python3-pip
     apt-get-install net-tools
     apt-get-install gnupg2
 
-    wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-    apt-get-install -o root -g root -m 644 packages.microsoft.gpg /etc/apt/trusted.gpg.d/
-    sh -c 'echo "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
-    apt-get update update
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EB3E94ADBE1229CF
+    add-apt-repository -y "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
     apt-get-install code
 }
 
@@ -67,5 +65,8 @@ then
     setup_timezone
     setup_cleanup
     
-    [ "$1" == "development" ] && echo "Setting up development machine..." && setup_dev    
+    if [ "$1" == "development" ]
+    then 
+        setup_dev    
+    fi
 fi
