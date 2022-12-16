@@ -29,12 +29,14 @@ Vagrant.configure("2") do |config|
       v.vm.network "private_network", ip: $hosts[name]
     end
 
-    if (name == "development")
+    if name == "development"
       developmentVM = true
     end
 
     config.vm.provider "virtualbox" do |v|
-      if ( developmentVM || name == "ubuntu22" )
+      if developmentVM 
+        v.memory = $developmentMemory
+      elsif name == "ubuntu22"
         v.memory = $managerMemory
       else
         v.memory = $agentMemory
@@ -46,26 +48,26 @@ Vagrant.configure("2") do |config|
     end
 
     config.vm.provider "vmware_desktop" do |v|
-      if ( developmentVM || name == "ubuntu22" )
+      if developmentVM 
+        v.memory = $developmentMemory
+      elsif  name == "ubuntu22"
         v.memory = $managerMemory
-      else
-        v.memory = $agentMemory
       end
       v.vmx["numvcpus"] = $cpus
     end    
   end
 
-  # The vboxsf filesystem is not installed so we can't share folders
+  # Disable default shared
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
-  config.vm.provision "file", source: "../shared", destination: "shared"
-  
-  # Provision development machine
+  # Provision
   if developmentVM == true
-    config.vm.synced_folder "~/Documents/wazuh/", "/vagrant", disabled: true
+    # Provision development machine
     config.vm.provision "shell", path: "setup.sh", args: "development", env: {"SHARED_DIR" => "/home/vagrant/shared"}
   else
     config.vm.provision "shell", path: "setup.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
   end
+  
+  config.vm.provision "file", source: "../shared", destination: "shared"
 
 end

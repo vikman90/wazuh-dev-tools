@@ -48,10 +48,14 @@ setup_dev() {
     apt-get-install python3-pip
     apt-get-install net-tools
     apt-get-install gnupg2
+    apt-get-install cmake
+    apt-get-install clang
+    apt-get-install ninja-build
+    apt-get-install mysql-server
 
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EB3E94ADBE1229CF
     add-apt-repository -y "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
-    apt-get-install code
+    apt-get-install code    
 }
 
 if [ -z "$sourced" ]
