@@ -13,11 +13,6 @@ setup_packages() {
 
 if [ -z "$sourced" ]
 then
+    setup_shared
     setup_packages
-    setup_files
-    setup_git
-    setup_shell
-    setup_ssh
-    setup_timezone
-    setup_cleanup
 fi

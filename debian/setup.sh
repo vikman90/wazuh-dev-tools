@@ -60,14 +60,8 @@ setup_dev() {
 
 if [ -z "$sourced" ]
 then
+    setup_shared
     setup_packages
-    setup_wazuh_repo
-    setup_files
-    setup_git
-    setup_shell
-    setup_ssh
-    setup_timezone
-    setup_cleanup
     
     if [ "$1" == "development" ]
     then 

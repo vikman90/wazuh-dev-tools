@@ -40,25 +40,17 @@ setup_git() {
     gpg --batch --import $SHARED_DIR/private/gpg_key.asc
 }
 
-setup_ssh() {
-    mkdir -p $HOME/.ssh
-    chmod 700 ~/.ssh
-    cp $SHARED_DIR/private/id_rsa* $HOME/.ssh
-    cp $HOME/.ssh/id_rsa.pub $HOME/.ssh/authorized_keys
-    chmod 600 $HOME/.ssh/{id_rsa,authorized_keys}
-}
-
-setup_shell() {
-    cp -rT /etc/skel $HOME
-    cp $SHARED_DIR/wazuh_shell.sh $HOME/.wazuh_shell
-    echo 'source $HOME/.wazuh_shell' >> $HOME/.bashrc
-    echo 'export GPG_TTY=$(tty)' >> $HOME/.bashrc
-}
-
 setup_timezone() {
     timedatectl set-timezone $TIMEZONE
 }
 
 setup_cleanup() {
     rm -r $SHARED_DIR
+}
+
+setup_shared() {
+    echo "Setting up shared configurations"
+    setup_git
+    setup_timezone
+    setup_cleanup
 }
