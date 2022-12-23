@@ -6,7 +6,6 @@
 require_relative "../shared/shared.rb"
 
 machines = {
-  "development" => {"box" => "generic/ubuntu2204" , "autostart" => true },
   "debian11"    => {"box" => "generic/debian11"   , "autostart" => false},
   "debian10"    => {"box" => "generic/debian10"   , "autostart" => false},
   "debian9"     => {"box" => "generic/debian9"    , "autostart" => false},
@@ -15,7 +14,7 @@ machines = {
   "ubuntu21"    => {"box" => "generic/ubuntu2104" , "autostart" => false},
   "ubuntu20"    => {"box" => "generic/ubuntu2010" , "autostart" => false},
   "ubuntu18"    => {"box" => "generic/ubuntu1804" , "autostart" => false},
-  "ubuntu16"    => {"box" => "generic/ubuntu1604" , "autostart" => false},
+  "ubuntu18"    => {"box" => "generic/ubuntu1604" , "autostart" => false},
 }
 
 Vagrant.configure("2") do |config|
@@ -24,52 +23,21 @@ Vagrant.configure("2") do |config|
       v.vm.box = vm["box"]
       v.vm.hostname = name
       v.vm.network "private_network", ip: $hosts[name]
-    end
+    end  
+  end
 
-    if (name .eql? "development")
-      config.vm.provision "shell", inline: "echo Detected development VM"
-      $developmentVM = true
-    else
-      $developmentVM = false
-    end
+  # The vboxsf filesystem is not installed so we can't share folders
+  config.vm.synced_folder ".", "/vagrant", disabled: true
 
-    config.vm.provider "virtualbox" do |v|
-      if (name .eql? "development")
-        v.memory = $developmentMemory
-      elsif (name .eql? "ubuntu22")
-        v.memory = $managerMemory
-      else
-        v.memory = $agentMemory
-      end
+  ## Provision ##
+  # Mount shared files for provisioning
+  config.vm.provision "file", source: "../shared", destination: "shared"
+  config.vm.provision "shell", path: "setup.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
 
-      v.cpus = $cpus
-      v.default_nic_type = "virtio"
-      v.customize [ "modifyvm", :id, "--uartmode1", "file", File::NULL ]
-    end
-
-    config.vm.provider "vmware_desktop" do |v|
-      if (name .eql? "development")
-        v.memory = $developmentMemory
-      elsif (name .eql? "ubuntu22")
-        v.memory = $managerMemory
-      end
-      v.vmx["numvcpus"] = $cpus
-    end    
-
-    # Disable default shared
-    config.vm.synced_folder ".", "/vagrant", disabled: true
-
-    ## Provision ##
-    # Mount shared files for provisioning
-    config.vm.provision "file", source: "../shared", destination: "shared"  
-
-    if (name .eql? "development")
-      config.vm.provision "shell", inline: "echo Provisioning development"
-      config.vm.provision "shell", path: "setup.sh", args: "development", env: {"SHARED_DIR" => "/home/vagrant/shared"}
-    else
-      config.vm.provision "shell", inline: "echo Provisioning"
-      config.vm.provision "shell", path: "setup.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
-    end
+  config.vm.provider "virtualbox" do |v|
+    v.cpus = $cpus
+    v.memory = $agentMemory
+    v.default_nic_type = "virtio"
   end
 
   # Disable default shared

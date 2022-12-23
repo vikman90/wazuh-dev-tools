@@ -38,4 +38,4 @@ $hosts = {
 $developmentMemory = 12288
 $agentMemory = 1024
 $managerMemory = 8192
-$cpus = 8
+$cpus = 6

@@ -24,6 +24,6 @@ setup_packages() {
 
 if [ -z "$sourced" ]
 then
-    setup_shared
     setup_packages
+    setup_shared
 fi 

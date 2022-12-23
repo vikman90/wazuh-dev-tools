@@ -31,17 +31,6 @@ setup_packages() {
     apt-get-install net-tools
     apt-get-install gnupg2
 
-    apt-get-upgrade
-}
-
-setup_wazuh_repo() {
-    curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key-add
-    echo "deb https://packages.wazuh.com/4.x/apt/ stable main" > /etc/apt/sources.list.d/wazuh.list
-}
-
-setup_dev() {
-    apt-get update
-
     apt-get-install build-essential
     apt-get-install libssl-dev
     apt-get-install python3
@@ -56,14 +45,18 @@ setup_dev() {
 
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EB3E94ADBE1229CF
     add-apt-repository -y "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
-    apt-get-install code    
+    apt-get-install code  
+
+    apt-get-upgrade
+}
+
+setup_wazuh_repo() {
+    curl -s https://packages.wazuh.com/key/GPG-KEY-WAZUH | apt-key-add
+    echo "deb https://packages.wazuh.com/4.x/apt/ stable main" > /etc/apt/sources.list.d/wazuh.list
 }
 
 if [ -z "$sourced" ]
 then
     setup_packages
     setup_shared
-    if [ "$1" == "development" ]; then 
-        setup_dev    
-    fi
 fi

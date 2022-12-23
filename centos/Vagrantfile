@@ -1,13 +1,20 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Gentoo
+# Redhat
 # July 18, 2022
 
 require_relative "../shared/shared.rb"
 
 machines = {
-  "gentoo"  => {"box" => "generic/gentoo", "autostart" => true},
+  "rhel9"   => {"box" => "generic/rhel9"    , "autostart" => true},
+  "rhel8"   => {"box" => "generic/rhel8"    , "autostart" => false},
+  "rhel7"   => {"box" => "generic/rhel6"    , "autostart" => false},
+  "rhel6"   => {"box" => "generic/rhel7"    , "autostart" => false},
+  "centos9" => {"box" => "generic/centos9s" , "autostart" => false},  
+  "centos8" => {"box" => "generic/centos8"  , "autostart" => false},
+  "centos7" => {"box" => "generic/centos7"  , "autostart" => false},
+  "centos6" => {"box" => "generic/centos6"  , "autostart" => false},
 }
 
 Vagrant.configure("2") do |config|
@@ -16,7 +23,7 @@ Vagrant.configure("2") do |config|
       v.vm.box = vm["box"]
       v.vm.hostname = name
       v.vm.network "private_network", ip: $hosts[name]
-    end  
+    end
   end
 
   # The vboxsf filesystem is not installed so we can't share folders
@@ -26,14 +33,9 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", path: "setup.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
 
   config.vm.provider "virtualbox" do |v|
-    v.memory = $agentMemory
+    v.memory = $agentMemory * 2
     v.cpus = $cpus
     v.default_nic_type = "virtio"
     v.customize ["modifyvm", :id, "--audio", "none"]
-  end
-
-  config.vm.provider "vmware_desktop" do |v|
-    v.vmx["memsize"] = $agentMemory
-    v.vmx["numvcpus"] = $cpus
   end
 end
