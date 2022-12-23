@@ -62,9 +62,7 @@ if [ -z "$sourced" ]
 then
     setup_shared
     setup_packages
-    
-    if [ "$1" == "development" ]
-    then 
+    if [ "$1" == "development" ]; then 
         setup_dev    
     fi
 fi

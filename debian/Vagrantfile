@@ -3,7 +3,6 @@
 
 # Debian
 # July 18, 2022
-
 require_relative "../shared/shared.rb"
 
 machines = {
@@ -19,8 +18,6 @@ machines = {
   "ubuntu16"    => {"box" => "generic/ubuntu1604" , "autostart" => false},
 }
 
-developmentVM = false
-
 Vagrant.configure("2") do |config|
   machines.each do |name, vm|
     config.vm.define name, autostart: vm["autostart"] do |v|
@@ -29,16 +26,17 @@ Vagrant.configure("2") do |config|
       v.vm.network "private_network", ip: $hosts[name]
     end
 
-    if name == "development"
-      developmentVM = true
+    if (name .eql? "development")
+      config.vm.provision "shell", inline: "echo Detected development VM"
+      $developmentVM = true
     else
-      developmentVM = false
+      $developmentVM = false
     end
 
     config.vm.provider "virtualbox" do |v|
-      if developmentVM 
+      if (name .eql? "development")
         v.memory = $developmentMemory
-      elsif name == "ubuntu22"
+      elsif (name .eql? "ubuntu22")
         v.memory = $managerMemory
       else
         v.memory = $agentMemory
@@ -50,13 +48,28 @@ Vagrant.configure("2") do |config|
     end
 
     config.vm.provider "vmware_desktop" do |v|
-      if developmentVM 
+      if (name .eql? "development")
         v.memory = $developmentMemory
-      elsif  name == "ubuntu22"
+      elsif (name .eql? "ubuntu22")
         v.memory = $managerMemory
       end
       v.vmx["numvcpus"] = $cpus
     end    
+
+    # Disable default shared
+    config.vm.synced_folder ".", "/vagrant", disabled: true
+
+    ## Provision ##
+    # Mount shared files for provisioning
+    config.vm.provision "file", source: "../shared", destination: "shared"  
+
+    if (name .eql? "development")
+      config.vm.provision "shell", inline: "echo Provisioning development"
+      config.vm.provision "shell", path: "setup.sh", args: "development", env: {"SHARED_DIR" => "/home/vagrant/shared"}
+    else
+      config.vm.provision "shell", inline: "echo Provisioning"
+      config.vm.provision "shell", path: "setup.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
+    end
   end
 
   # Disable default shared
