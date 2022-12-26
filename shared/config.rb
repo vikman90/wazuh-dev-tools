@@ -32,7 +32,8 @@ $hosts = {
 
     "amzn2"                 => "192.168.56.70",
 
-    "development"           => "192.168.56.80"
+    "development"           => "192.168.56.80",
+    "manager"               => "192.168.56.81"    
 }
 
 $developmentMemory = 12288
