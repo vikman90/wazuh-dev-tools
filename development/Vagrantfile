@@ -6,8 +6,7 @@
 require_relative "../shared/shared.rb"
 
 machines = {
-  "development" => {"box" => "generic/ubuntu2204" , "autostart" => false},
-  "manager"     => {"box" => "generic/ubuntu2204" , "autostart" => false},
+  "development" => {"box" => "generic/ubuntu2204" , "autostart" => true}
 }
 
 Vagrant.configure("2") do |config|
@@ -22,13 +21,13 @@ Vagrant.configure("2") do |config|
   # The vboxsf filesystem is not installed so we can't share folders
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
-  # Setup disk space
-  config.vm.disk :disk, size: "200GB", primary: true
-
   ## Provision ##
   # Mount shared files for provisioning
   config.vm.provision "file", source: "../shared", destination: "shared"
   config.vm.provision "shell", path: "setup.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
+
+  # Setup disk space
+  config.vm.disk :disk, size: "300GB", primary: true
 
   config.vm.provider "virtualbox" do |v|
     v.cpus = $cpus
