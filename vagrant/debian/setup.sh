@@ -8,6 +8,18 @@ set -e
 source shared/shared.sh
 source /etc/os-release
 
+setup_network() {
+    # Ubuntu Kinetic has no default gateway, this prevents it from reaching the
+    # Internet when defining an additional private network.
+
+    if ! ip route | grep default > /dev/null
+    then
+        1>&2 echo "WARN: Undefined default gateway. Adding."
+        cp $SHARED_DIR/51-gateway.yaml /etc/netplan
+        netplan apply
+    fi
+}
+
 apt-get-install() {
     DEBIAN_FRONTEND='noninteractive' apt-get install -y $@
 }
@@ -65,6 +77,7 @@ setup_nfs() {
 
 if [ -z "$sourced" ]
 then
+    setup_network
     setup_packages
     setup_cmocka_win
     setup_wazuh_repo
