@@ -1,0 +1,10 @@
+[user]
+	signingkey = 3092A1B894CF8BFA
+	name = sebasfalcone
+	email = sebastian.falcone@wazuh.com
+[commit]
+    gpgsign = true
+[core]
+    editor = nano
+[pull]
+    rebase = false

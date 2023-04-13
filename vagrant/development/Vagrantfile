@@ -1,0 +1,37 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Debian
+# July 18, 2022
+require_relative "../shared/shared.rb"
+
+machines = {
+  "development" => {"box" => "generic/ubuntu2204" , "autostart" => true}
+}
+
+Vagrant.configure("2") do |config|
+  machines.each do |name, vm|
+    config.vm.define name, autostart: vm["autostart"] do |v|
+      v.vm.box = vm["box"]
+      v.vm.hostname = name
+      v.vm.network "private_network", ip: $hosts[name]
+    end  
+  end
+
+  # The vboxsf filesystem is not installed so we can't share folders
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+
+  ## Provision ##
+  # Mount shared files for provisioning
+  config.vm.provision "file", source: "../shared", destination: "shared"
+  config.vm.provision "shell", path: "setup.sh", env: {"SHARED_DIR" => "/home/vagrant/shared"}
+
+  # Setup disk space
+  config.vm.disk :disk, size: "300GB", primary: true
+
+  config.vm.provider "virtualbox" do |v|
+    v.cpus = $cpus
+    v.memory = $developmentMemory
+    v.default_nic_type = "virtio"
+  end
+end

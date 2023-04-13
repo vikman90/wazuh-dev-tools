@@ -1,0 +1,38 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Windows
+# July 18, 2022
+
+require_relative "../shared/shared.rb"
+
+machines = {
+  "windows-server-2022"  => {"box" => "gusztavvargadr/windows-server"               , "autostart" => true},
+  "windows-server-2019"  => {"box" => "gusztavvargadr/windows-server-2019-standard" , "autostart" => false},
+  "windows-11"           => {"box" => "gusztavvargadr/windows-11"                   , "autostart" => false},
+  "windows-10"           => {"box" => "gusztavvargadr/windows-10"                   , "autostart" => false},
+}
+  
+Vagrant.configure("2") do |config|
+    machines.each do |name, vm|
+        config.vm.define name, autostart: vm["autostart"] do |v|
+            v.vm.box = vm["box"]
+            v.vm.hostname = name
+            v.vm.network "private_network", ip: $hosts[name]
+        end
+    end
+    
+    #config.vm.provision "file", source: "../shared", destination: "shared"
+    #config.vm.provision "shell", path: "setup.sh", args: "--tumbleweed", env: {"SHARED_DIR" => "../shared"}, reboot: "yes"
+    
+    config.vm.provider "virtualbox" do |v|
+        v.memory = $agentMemory
+        v.cpus = $cpus
+        v.default_nic_type = "virtio"
+        v.gui = true
+
+        v.customize ["modifyvm", :id, "--usb", "on"]
+        v.customize ["modifyvm", :id, "--usbehci", "off"]
+        v.customize ['modifyvm', :id, '--clipboard', 'bidirectional']          
+    end
+end
