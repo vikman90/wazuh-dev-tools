@@ -14,7 +14,7 @@ machines = {
   "ubuntu21"    => {"box" => "generic/ubuntu2104" , "autostart" => false},
   "ubuntu20"    => {"box" => "generic/ubuntu2010" , "autostart" => false},
   "ubuntu18"    => {"box" => "generic/ubuntu1804" , "autostart" => false},
-  "ubuntu18"    => {"box" => "generic/ubuntu1604" , "autostart" => false},
+  "ubuntu16"    => {"box" => "generic/ubuntu1604" , "autostart" => false},
 }
 
 Vagrant.configure("2") do |config|
