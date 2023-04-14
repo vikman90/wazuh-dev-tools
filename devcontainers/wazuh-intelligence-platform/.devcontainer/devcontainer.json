@@ -1,0 +1,36 @@
+{
+  "name": "Wazuh-inteligence-platform",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  // "forwardPorts": [],
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools-themes",
+        "ms-vscode.cmake-tools",
+        "twxs.cmake",
+        "ms-vscode.cpptools-extension-pack",
+        "cschlosser.doxdocgen",
+        "esbenp.prettier-vscode",
+        "redhat.vscode-xml",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        "josetr.cmake-language-support-vscode",
+        "webfreak.debug",
+        "notskm.clang-tidy",
+        "mhutchie.git-graph",
+        "znck.grammarly",
+        "ms-vscode.cpptools",
+        "xaver.clang-format",
+        "yzhang.markdown-all-in-one",
+        "mesonbuild.mesonbuild",
+        "ms-python.vscode-pylance",
+        "eamodio.gitlens",
+        "ms-python.python",
+        "github.copilot"
+      ]
+    }
+  }
+}
