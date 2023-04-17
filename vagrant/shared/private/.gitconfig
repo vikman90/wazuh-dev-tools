@@ -1,7 +1,7 @@
 [user]
-	signingkey = 3092A1B894CF8BFA
+	signingkey = 8EDE7D2CC8244AC2
 	name = sebasfalcone
-	email = sebastian.falcone@wazuh.com
+	email = sebastianfalcone01@gmail.com
 [commit]
     gpgsign = true
 [core]
