@@ -43,10 +43,10 @@ setup_packages() {
 
     apt-get-install build-essential
     apt-get-install libssl-dev
+    apt-get-install patchelf
     apt-get-install python3
     apt-get-install python3-pip
     apt-get-install net-tools
-    apt-get-install gnupg2
     apt-get-install cmake
     apt-get-install clang
     apt-get-install ninja-build
