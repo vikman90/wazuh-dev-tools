@@ -52,6 +52,7 @@ setup_packages() {
     apt-get-install ninja-build
     apt-get-install mysql-server
     apt-get-install postgresql-client
+    apt-get-install heaptrack heaptrack-gui
 
     # VSCODE
     echo "Installing vscode"
@@ -83,17 +84,8 @@ setup_wazuh_repo() {
     echo "deb https://packages.wazuh.com/4.x/apt/ stable main" > /etc/apt/sources.list.d/wazuh.list
 }
 
-setup_disk() {
-    echo "Remember to execute this commands in order to update the disk size: "
-    echo "sudo parted /dev/sda resizepart 3 100%"
-    echo "sudo pvresize /dev/sda3"
-    echo "sudo lvextend -l+100%FREE /dev/ubuntu-vg/ubuntu-lv"
-    echo "sudo resize2fs /dev/ubuntu-vg/ubuntu-lv"    
-}
-
 if [ -z "$sourced" ]
 then
     setup_packages
     setup_shared
-    setup_disk
 fi
