@@ -1,36 +1,38 @@
 {
   "name": "Wazuh-inteligence-platform",
+ 
   "build": {
     "dockerfile": "Dockerfile"
   },
 
-  // "forwardPorts": [],
-
   "customizations": {
     "vscode": {
       "extensions": [
-        "ms-vscode.cpptools-themes",
-        "ms-vscode.cmake-tools",
-        "twxs.cmake",
-        "ms-vscode.cpptools-extension-pack",
         "cschlosser.doxdocgen",
+        "eamodio.gitlens",
         "esbenp.prettier-vscode",
-        "redhat.vscode-xml",
-        "ms-dotnettools.vscode-dotnet-runtime",
+        "github.copilot",
         "josetr.cmake-language-support-vscode",
-        "webfreak.debug",
-        "notskm.clang-tidy",
-        "mhutchie.git-graph",
-        "znck.grammarly",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-vscode.cmake-tools",
         "ms-vscode.cpptools",
+        "notskm.clang-tidy",
+        "redhat.vscode-xml",
+        "twxs.cmake",
+        "webfreak.debug",
         "xaver.clang-format",
         "yzhang.markdown-all-in-one",
-        "mesonbuild.mesonbuild",
-        "ms-python.vscode-pylance",
-        "eamodio.gitlens",
-        "ms-python.python",
-        "github.copilot"
+        "znck.grammarly"
       ]
     }
-  }
+  },
+
+  "remoteUser": "vscode",
+  
+  "postCreateCommand": "sudo chown -R vscode:vscode /work && sudo chmod -R 777 /work",
+
+  "mounts": [
+    "source=${localWorkspaceFolder}/work,target=/work,type=bind,consistency=cached"
+  ]
 }
