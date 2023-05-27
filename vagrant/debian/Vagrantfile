@@ -6,7 +6,8 @@
 require_relative "../shared/shared.rb"
 
 machines = {
-  "kinetic" => {"box" => "generic/ubuntu2210", "autostart" => true},
+  "lunar" => {"box" => "ubuntu/lunar64", "autostart" => true},
+  "kinetic" => {"box" => "generic/ubuntu2210", "autostart" => false},
   "jammy" => {"box" => "generic/ubuntu2204", "autostart" => false},
   "impish" => {"box" => "generic/ubuntu2110", "autostart" => false},
   "hirsute" => {"box" => "generic/ubuntu2104", "autostart" => false},
@@ -38,7 +39,7 @@ Vagrant.configure("2") do |config|
     v.memory = $memory
     v.cpus = $cpus
     v.default_nic_type = "virtio"
-    v.customize [ "modifyvm", :id, "--uartmode1", "file", File::NULL ]
+    # v.customize [ "modifyvm", :id, "--uartmode1", "file", File::NULL ]
   end
 
   config.vm.provider "vmware_desktop" do |v|
