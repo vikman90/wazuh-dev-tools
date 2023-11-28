@@ -25,5 +25,5 @@ $hosts = {
     "lunar" => "192.168.33.30",
 }
 
-$memory = 2048
+$memory = 4096
 $cpus = 8
