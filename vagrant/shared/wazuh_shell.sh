@@ -2,14 +2,14 @@
 # Wazuh Inc.
 # May 22, 2016
 #
-# Rev 12
+# Rev 15
 #
 # Install:
 # Go to the directory that contains this file and run:
 # cp wazuh_shell.sh ~/.wazuh.sh && echo -e '\n. $HOME/.wazuh.sh' >> ~/.bashrc && . ~/.bashrc
 
 # Set these values at your convenience
-THREADS=4
+THREADS=8
 GIT_DEPTH=128
 
 if [ -z "$THREADS" ]
@@ -27,7 +27,6 @@ then
 fi
 
 export PATH=$PATH:/var/ossec/bin
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/var/ossec/lib
 
 alias make-agent="make -j$THREADS TARGET=agent"
 alias make-server="make -j$THREADS TARGET=server"
@@ -87,7 +86,8 @@ alias scan-build-server='find /tmp -name "scan-build-*" -exec rm -r {} +; scan-b
 alias unit-tests-server='make-server-test && (cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=server .. && make -j$THREADS && ctest)'
 alias unit-tests-agent='make-agent-test && (cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=agent .. && make -j$THREADS && ctest)'
 alias unit-tests-winagent='make-winagent-test && (cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=winagent -DCMAKE_TOOLCHAIN_FILE=../Toolchain-win32.cmake .. && make -j$THREADS && WINEPATH=/usr/i686-w64-mingw32/lib\;$(dirname $(dirname $(pwd))) ctest)'
-alias wazuh-api='curl -w\\n -sk -H "Authorization: Bearer $(curl -u wazuh:wazuh -sk -X GET "https://localhost:55000/security/user/authenticate?raw=true")"'
+alias wazuh-api-token='curl -u wazuh:wazuh -sk -X GET "https://localhost:55000/security/user/authenticate?raw=true"'
+alias wazuh-api='curl -w\\n -sk -H "Authorization: Bearer $(wazuh-api-token)"'
 alias git-log='git log --oneline --graph'
 alias git-push='git push --set-upstream origin `git rev-parse --abbrev-ref HEAD`'
 alias git-pull='git pull --depth $GIT_DEPTH'
@@ -96,7 +96,7 @@ git-clone-wazuh() {
     if [ -n "$1" ]
     then
         branch="-b $1"
-        folder="wazuh-$1"
+        folder="wazuh-$(echo $1 | tr '/' '-')"
     else
         folder="wazuh"
     fi
@@ -106,6 +106,19 @@ git-clone-wazuh() {
 
 git-add-branches() {
     git remote set-branches --add origin $@ && git fetch --depth $GIT_DEPTH origin $@
+}
+
+git-clean-branches() {
+    basedir=$(git rev-parse --git-dir)
+
+    git fetch --depth 1 2>&1 | grep "fatal: couldn't find remote ref refs/heads/" | while read i
+    do
+        branch=${i##fatal: couldn\'t find remote ref refs/heads/}
+        escaped=$(echo $branch | sed -e 's/[]\/$*.^[]/\\&/g')
+        echo "Deleting branch $branch"
+        sed -i "/fetch = +refs\\/heads\\/$escaped:refs\\/remotes\\/origin\\/$escaped/d" $basedir/config
+    done
+
 }
 
 function sgrep() {
