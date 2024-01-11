@@ -46,7 +46,7 @@ setup_packages() {
     fi
 
     # Shell tools
-    apt-get-install gdb valgrind net-tools psmisc tcpdump sqlite3 netcat-openbsd strace glibc-doc python3 python3-pip
+    apt-get-install gdb valgrind net-tools psmisc tcpdump sqlite3 netcat-openbsd strace glibc-doc python3 python3-pip jq
 }
 
 setup_cmocka_win() {
