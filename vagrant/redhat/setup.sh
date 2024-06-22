@@ -2,6 +2,8 @@
 # Vikman Fernandez-Castro
 # February 9, 2020
 
+[ "$_" = "$0" ] || sourced=0
+
 set -e
 source shared/shared.sh
 
@@ -55,6 +57,10 @@ setup_packages() {
     fi
 }
 
+setup_cmocka_win() {
+    : # Not supported
+}
+
 setup_wazuh_repo() {
     cat > /etc/yum.repos.d/wazuh.repo <<\EOF
 [wazuh_repo]
@@ -98,13 +104,16 @@ setup_nfs() {
     # firewall-cmd --reload
 }
 
-setup_packages
-setup_wazuh_repo
-setup_files
-setup_git
-setup_shell
-setup_ssh
-setup_selinux
-setup_timezone
-setup_nfs
-setup_cleanup
+if [ -z "$sourced" ]
+then
+    setup_packages
+    setup_wazuh_repo
+    setup_files
+    setup_git
+    setup_shell
+    setup_ssh
+    setup_selinux
+    setup_timezone
+    setup_nfs
+    setup_cleanup
+fi
