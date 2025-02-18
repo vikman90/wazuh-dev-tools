@@ -32,6 +32,13 @@ setup_packages() {
         yum config-manager --set-enabled powertools
     fi
 
+    if [ $OS_MAJOR -le 8 ]
+    then
+        # Set up Vault Mirror
+        sed -i.bak 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+        sed -i.bak 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+    fi
+
     # Wazuh required packages
     yum-install make gcc git automake autoconf libtool checkpolicy libcmocka-devel gcc-c++ libstdc++-static
 

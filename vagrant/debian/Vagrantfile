@@ -6,9 +6,9 @@
 require_relative "../shared/shared.rb"
 
 machines = {
-  "noble" => {"box" => "ubuntu/noble64", "autostart" => true},
-  "mantic" => {"box" => "ubuntu/mantic64", "autostart" => false},
-  "lunar" => {"box" => "ubuntu/lunar64", "autostart" => false},
+  "noble" => {"box" => "bento/ubuntu-24.04", "autostart" => true},
+  "mantic" => {"box" => "generic/ubuntu2310", "autostart" => false},
+  "lunar" => {"box" => "generic/ubuntu2304", "autostart" => false},
   "kinetic" => {"box" => "generic/ubuntu2210", "autostart" => false},
   "jammy" => {"box" => "generic/ubuntu2204", "autostart" => false},
   "impish" => {"box" => "generic/ubuntu2110", "autostart" => false},
