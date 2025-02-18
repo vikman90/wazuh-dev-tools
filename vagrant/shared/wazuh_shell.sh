@@ -2,7 +2,7 @@
 # Wazuh Inc.
 # May 22, 2016
 #
-# Rev 15
+# Rev 16
 #
 # Install:
 # Go to the directory that contains this file and run:
@@ -79,6 +79,7 @@ alias valgrind-all="valgrind --track-fds=yes --leak-check=full --show-leak-kinds
 alias docker-rm="docker rm -f \$(docker ps -aq) 2> /dev/null"
 alias docker-rmi="docker rmi -f \$(docker images | awk '/^<none>/ {print \$3}') 2> /dev/null"
 alias docker-run="docker run -it --rm"
+alias docker-restart="docker compose build && docker compose down && docker compose up"
 alias watch-doc="make clean && make -j$THREADS html && while true; do inotifywait -re CLOSE_WRITE source; make -j$THREADS html; done"
 alias vagrant-halt='vagrant global-status | grep running | cut -d" " -f1 | while read i; do vagrant halt $i; done'
 alias scan-build-view='scan-view /tmp/scan-build-* --host 0.0.0.0 --port 80 --allow-all-hosts --no-browser'
@@ -105,7 +106,7 @@ git-clone-wazuh() {
 }
 
 git-add-branches() {
-    git remote set-branches --add origin $@ && git fetch --depth $GIT_DEPTH origin $@
+    git remote set-branches --add origin $@ && git fetch --depth $GIT_DEPTH origin
 }
 
 git-clean-branches() {
@@ -116,9 +117,22 @@ git-clean-branches() {
         branch=${i##fatal: couldn\'t find remote ref refs/heads/}
         escaped=$(echo $branch | sed -e 's/[]\/$*.^[]/\\&/g')
         echo "Deleting branch $branch"
-        sed -i "/fetch = +refs\\/heads\\/$escaped:refs\\/remotes\\/origin\\/$escaped/d" $basedir/config
+        sed -i '' "/fetch = +refs\\/heads\\/$escaped:refs\\/remotes\\/origin\\/$escaped/d" $basedir/config
     done
 
+}
+
+git-checkout() {
+    output=$(git checkout $1 2>&1)
+    errcode=$?
+
+    if [ $errcode -ne 0 ]
+    then
+        git-add-branches $1 && git checkout $1
+    else
+        >&2 echo "$output"
+        return $errcode
+    fi
 }
 
 function sgrep() {
@@ -152,17 +166,24 @@ wazuh_uninstall() {
 
     if ! . $OSSEC_INIT 2> /dev/null
     then
-        echo "Wazuh seems not to be installed. Removing anyway..."
-        DIRECTORY="/var/ossec"
+        if [ $(uname) = "Darwin" ]
+        then
+            DIRECTORY="/Library/Ossec"
+        else
+            DIRECTORY="/var/ossec"
+        fi
     fi
 
     # Stop service
-    if [ $(uname) = "Linux" ]
-    then
+    case $(uname) in
+    Linux)
         service wazuh-manager stop 2> /dev/null
         service wazuh-agent stop 2> /dev/null
         service wazuh-api stop 2> /dev/null
-    fi
+        ;;
+    Darwin)
+        launchctl unload /Library/LaunchDaemons/com.wazuh.agent.plist 2> /dev/null
+    esac
 
     # Stop daemons
     $DIRECTORY/bin/ossec-control stop 2> /dev/null
@@ -186,6 +207,8 @@ wazuh_uninstall() {
         fi
         ;;
     Darwin)
+        rm -f /Library/LaunchDaemons/com.wazuh.agent.plist
+        rm -rf /Library/StartupItems/WAZUH
         rm -rf /Library/StartupItems/OSSEC
         ;;
     SunOS)
@@ -231,6 +254,13 @@ wazuh_uninstall() {
         userdel wazuh 2> /dev/null
         groupdel wazuh 2> /dev/null
     esac
+
+    # Forget package
+
+    if [ $(uname) = "Darwin" ]
+    then
+        pkgutil --forget com.wazuh.pkg.wazuh-agent 2> /dev/null
+    fi
 }
 
 set-manager() {
