@@ -8,7 +8,7 @@ require_relative "../shared/shared.rb"
 machines = {
   "rocky" => {"box" => "generic/rocky9", "autostart" => true},
   "alma" => {"box" => "generic/alma9", "autostart" => false},
-  "fedora" => {"box" => "fedora/40-cloud-base", "autostart" => false},
+  "fedora" => {"box" => "fedora/41-cloud-base", "autostart" => false},
   "centos10" => {"box" => "centos/stream10", "autostart" => false},
   "centos8" => {"box" => "bento/centos-stream-8", "autostart" => false},
   "centos7" => {"box" => "bento/centos-7", "autostart" => false},

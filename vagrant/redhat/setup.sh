@@ -7,8 +7,15 @@
 set -e
 source shared/shared.sh
 
-# Detect CentOS version
+# Detect OS name and version
+OS_NAME=$(. /etc/os-release; echo $ID)
 OS_MAJOR=$(grep -oE '[0-9]+' /etc/redhat-release | head -n1)
+
+if [ -z "$OS_NAME" ]
+then
+    >&2 echo "WARNING: cannot parse /etc/os-release (OS_NAME)"
+    exit 1
+fi
 
 if [ -z "$OS_MAJOR" ]
 then
@@ -21,22 +28,25 @@ yum-install() {
 }
 
 setup_packages() {
-    if [ $OS_MAJOR -ge 9 ]
+    if [ "$OS_NAME" != "fedora" ]
     then
-        # PowerTools for Rocky Linux ≥ 9
-        yum-install dnf-plugins-core
-        dnf config-manager --enable crb
-    elif [ $OS_MAJOR -eq 8 ]
-    then
-        # PowerTools for CentOS ≥ 8
-        yum config-manager --set-enabled powertools
-    fi
+        if [ $OS_MAJOR -ge 9 ]
+        then
+            # PowerTools for Rocky Linux ≥ 9
+            yum-install dnf-plugins-core
+            dnf config-manager --enable crb
+        elif [ $OS_MAJOR -eq 8 ]
+        then
+            # PowerTools for CentOS ≥ 8
+            yum config-manager --set-enabled powertools
+        fi
 
-    if [ $OS_MAJOR -le 8 ]
-    then
-        # Set up Vault Mirror
-        sed -i.bak 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-        sed -i.bak 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+        if [ $OS_MAJOR -le 8 ]
+        then
+            # Set up Vault Mirror
+            sed -i.bak 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+            sed -i.bak 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+        fi
     fi
 
     # Wazuh required packages
