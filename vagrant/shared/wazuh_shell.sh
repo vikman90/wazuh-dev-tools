@@ -2,7 +2,7 @@
 # Wazuh Inc.
 # May 22, 2016
 #
-# Rev 16
+# Rev 17
 #
 # Install:
 # Go to the directory that contains this file and run:
@@ -117,7 +117,8 @@ git-clean-branches() {
         branch=${i##fatal: couldn\'t find remote ref refs/heads/}
         escaped=$(echo $branch | sed -e 's/[]\/$*.^[]/\\&/g')
         echo "Deleting branch $branch"
-        sed -i '' "/fetch = +refs\\/heads\\/$escaped:refs\\/remotes\\/origin\\/$escaped/d" $basedir/config
+        # Linux requires no space between -i and ''
+        sed -i'' "/fetch = +refs\\/heads\\/$escaped:refs\\/remotes\\/origin\\/$escaped/d" $basedir/config
     done
 
 }
