@@ -8,7 +8,7 @@ set -e
 source shared/shared.sh
 
 # Detect OS name and version
-OS_NAME=$(. /etc/os-release; echo $ID)
+OS_NAME=$(sed 's/ release.*//' /etc/redhat-release)
 OS_MAJOR=$(grep -oE '[0-9]+' /etc/redhat-release | head -n1)
 
 if [ -z "$OS_NAME" ]
