@@ -29,14 +29,13 @@ apt-key-add() {
 }
 
 setup_packages() {
-    dpkg --add-architecture i386
     apt-get update
 
     # Package installer dependencies
     apt-get-install apt-transport-https
 
     # Wazuh required packages
-    apt-get-install make gcc curl git automake autoconf libtool gcc-mingw-w64-i686 g++-mingw-w64-i686 nsis cmake libcmocka-dev lcov wine32 cppcheck astyle
+    apt-get-install make gcc curl git automake autoconf libtool cmake lcov cppcheck astyle
 
     if [ "$VERSION_CODENAME" = "xenial" ]
     then
@@ -47,6 +46,15 @@ setup_packages() {
 
     # Shell tools
     apt-get-install gdb valgrind net-tools psmisc tcpdump sqlite3 netcat-openbsd strace glibc-doc python3 python3-pip jq
+
+    # Windows development toolchain
+
+    if [ "$(uname -m)" = "x86_64" ]
+    then
+        dpkg --add-architecture i386
+        apt-get update
+        apt-get-install gcc-mingw-w64-i686 g++-mingw-w64-i686 nsis libcmocka-dev wine32
+    fi
 }
 
 setup_cmocka_win() {
@@ -79,7 +87,12 @@ if [ -z "$sourced" ]
 then
     setup_network
     setup_packages
-    setup_cmocka_win
+
+    if [ "$(uname -m)" = "x86_64" ]
+    then
+        setup_cmocka_win
+    fi
+
     setup_wazuh_repo
     setup_files
     setup_git

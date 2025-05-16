@@ -29,7 +29,11 @@ distro=$(os_family)
 sudo -E bash <<EOF
     source $distro/setup.sh
     setup_packages
-    setup_cmocka_win
+
+    if [ "$(uname -m)" == "x86_64" ]; then
+        setup_cmocka_win
+    fi
+    
     setup_wazuh_repo
     setup_files
 EOF
