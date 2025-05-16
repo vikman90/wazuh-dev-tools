@@ -54,7 +54,7 @@ setup_ssh() {
     mkdir -p $HOME/.ssh
     chmod 700 ~/.ssh
     cp $SHARED_DIR/private/id_rsa* $HOME/.ssh
-    cp $HOME/.ssh/id_rsa.pub $HOME/.ssh/authorized_keys
+    cat $HOME/.ssh/id_rsa.pub >> $HOME/.ssh/authorized_keys
     chmod 600 $HOME/.ssh/{id_rsa,authorized_keys}
 }
 
