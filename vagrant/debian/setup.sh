@@ -79,7 +79,7 @@ setup_nfs() {
 
     systemctl enable rpc-statd
     systemctl start rpc-statd
-    echo "/ 192.168.33.1(rw,no_subtree_check,insecure,all_squash,anonuid=0,anongid=0)" >> /etc/exports
+    echo "/ 192.168.33.1(rw,no_subtree_check,insecure,all_squash,anonuid=0,anongid=0)" > /etc/exports
     exportfs -ra
 }
 

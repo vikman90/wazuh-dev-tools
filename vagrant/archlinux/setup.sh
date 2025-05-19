@@ -20,7 +20,7 @@ setup_packages() {
 setup_nfs() {
     pacman-install nfs-utils
 
-    echo "/ 192.168.33.1(rw,no_subtree_check,insecure,all_squash,anonuid=0,anongid=0)" >> /etc/exports
+    echo "/ 192.168.33.1(rw,no_subtree_check,insecure,all_squash,anonuid=0,anongid=0)" > /etc/exports
     exportfs -rav
 
     systemctl enable nfs-server.service
