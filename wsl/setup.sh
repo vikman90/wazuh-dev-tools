@@ -33,7 +33,7 @@ sudo -E bash <<EOF
     if [ "$(uname -m)" == "x86_64" ]; then
         setup_cmocka_win
     fi
-    
+
     setup_wazuh_repo
     setup_files
 EOF
