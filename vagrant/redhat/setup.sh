@@ -49,6 +49,8 @@ setup_packages() {
         fi
     fi
 
+    yum update -y
+
     # Wazuh required packages
     yum-install make gcc git automake autoconf libtool checkpolicy libcmocka-devel gcc-c++ libstdc++-static
 
