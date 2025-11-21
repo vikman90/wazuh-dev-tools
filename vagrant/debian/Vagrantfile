@@ -7,6 +7,7 @@ require_relative "../shared/shared.rb"
 
 machines = {
   "noble" => {"box" => "bento/ubuntu-24.04", "autostart" => true},
+  "bookworm" => {"box" => "generic/debian12", "autostart" => false},
   "mantic" => {"box" => "generic/ubuntu2310", "autostart" => false},
   "lunar" => {"box" => "generic/ubuntu2304", "autostart" => false},
   "kinetic" => {"box" => "generic/ubuntu2210", "autostart" => false},
