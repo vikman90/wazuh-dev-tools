@@ -2,7 +2,7 @@
 # Wazuh Inc.
 # May 22, 2016
 #
-# Rev 17
+# Rev 21
 #
 # Install:
 # Go to the directory that contains this file and run:
@@ -76,19 +76,35 @@ alias wazuh-uninstall='wazuh_uninstall'
 alias valgrind="valgrind --leak-check=full --num-callers=20 --track-origins=yes"
 alias valgrind-fds="valgrind --track-fds=yes --leak-check=full --num-callers=20 --track-origins=yes"
 alias valgrind-all="valgrind --track-fds=yes --leak-check=full --show-leak-kinds=all --num-callers=20 --track-origins=yes"
+
 alias docker-rm="docker rm -f \$(docker ps -aq) 2> /dev/null"
 alias docker-rmi="docker rmi -f \$(docker images | awk '/^<none>/ {print \$3}') 2> /dev/null"
+alias docker-rmv='docker-rm && docker volume ls -q | xargs docker volume rm -f'
 alias docker-run="docker run -it --rm"
 alias docker-restart="docker compose build && docker compose down && docker compose up"
+
 alias watch-doc="make clean && make -j$THREADS html && while true; do inotifywait -re CLOSE_WRITE source; make -j$THREADS html; done"
+
 alias vagrant-halt='vagrant global-status | grep running | cut -d" " -f1 | while read i; do vagrant halt $i; done'
+
+alias venv='[[ -d /root/.venv ]] || python3 -m venv /root/.venv; . /root/.venv/bin/activate'
+
+alias mitmproxy='/root/mitmproxy/mitmproxy --mode reverse:https://localhost:27001@27000 -k'
+alias mitmweb='/root/mitmproxy/mitmweb --mode reverse:https://localhost:27001@27000 -k'
+
 alias scan-build-view='scan-view /tmp/scan-build-* --host 0.0.0.0 --port 80 --allow-all-hosts --no-browser'
 alias scan-build-server='find /tmp -name "scan-build-*" -exec rm -r {} +; scan-build make -j$THREADS TARGET=server DEBUG=yes'
+
 alias unit-tests-server='make-server-test && (cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=server .. && make -j$THREADS && ctest)'
 alias unit-tests-agent='make-agent-test && (cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=agent .. && make -j$THREADS && ctest)'
-alias unit-tests-winagent='make-winagent-test && (cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=winagent -DCMAKE_TOOLCHAIN_FILE=../Toolchain-win32.cmake .. && make -j$THREADS && WINEPATH=/usr/i686-w64-mingw32/lib\;$(dirname $(dirname $(pwd))) ctest)'
-alias wazuh-api-token='curl -u wazuh:wazuh -sk -X GET "https://localhost:55000/security/user/authenticate?raw=true"'
+alias unit-tests-winagent='make-winagent-test && (cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=winagent -DCMAKE_TOOLCHAIN_FILE=../Toolchain-win32.cmake .. && make -j$THREADS && WINEPATH="/usr/i686-w64-mingw32/lib;/usr/lib/gcc/i686-w64-mingw32/13-posix;$(realpath $(pwd)/../..);$(realpath $(pwd)/../../shared_modules/sync_protocol/build/bin)" ctest)'
+
+WAZUH_API_USERNAME=${WAZUH_API_USERNAME:-wazuh}
+WAZUH_API_PASSWORD=${WAZUH_API_PASSWORD:-wazuh}
+
+alias wazuh-api-token='curl -u ${WAZUH_API_USERNAME}:${WAZUH_API_PASSWORD} -sk -X GET "https://localhost:55000/security/user/authenticate?raw=true"'
 alias wazuh-api='curl -w\\n -sk -H "Authorization: Bearer $(wazuh-api-token)"'
+
 alias git-log='git log --oneline --graph'
 alias git-push='git push --set-upstream origin `git rev-parse --abbrev-ref HEAD`'
 alias git-pull='git pull --depth $GIT_DEPTH'
@@ -96,21 +112,37 @@ alias git-pull='git pull --depth $GIT_DEPTH'
 git-clone-wazuh() {
     if [ -n "$1" ]
     then
-        branch="-b $1"
-        folder="wazuh-$(echo $1 | tr '/' '-')"
+        local branch="-b$1"
+        local folder="wazuh-$(echo $1 | tr '/' '-')"
     else
-        folder="wazuh"
+        local folder="wazuh"
+    fi
+
+    if [ -n "$2" ]
+    then
+        local folder="wazuh-$2"
     fi
 
     git clone git@github.com:wazuh/wazuh --depth $GIT_DEPTH $branch $folder
 }
 
-git-add-branches() {
-    git remote set-branches --add origin $@ && git fetch --depth $GIT_DEPTH origin
+git-fetch-branch() {
+    git remote set-branches --add origin $1 || return $?
+
+    if ! git fetch --depth $GIT_DEPTH origin 2> /dev/null
+    then
+        git-clean-branches
+        git fetch --depth $GIT_DEPTH origin
+    fi
+}
+
+git-fetch-tag() {
+    git fetch --depth $GIT_DEPTH origin tag $1
 }
 
 git-clean-branches() {
-    basedir=$(git rev-parse --git-dir)
+    local temp=$(mktemp /tmp/git-clean-branches.XXXXXX)
+    local basedir=$(git rev-parse --git-dir)
 
     git fetch --depth 1 2>&1 | grep "fatal: couldn't find remote ref refs/heads/" | while read i
     do
@@ -119,8 +151,10 @@ git-clean-branches() {
         echo "Deleting branch $branch"
         # Linux requires no space between -i and ''
         sed -i'' "/fetch = +refs\\/heads\\/$escaped:refs\\/remotes\\/origin\\/$escaped/d" $basedir/config
-    done
+    done | tee $temp
 
+    grep "^Deleting branch " $temp > /dev/null && git-clean-branches
+    rm -f $temp
 }
 
 git-checkout() {
@@ -129,7 +163,7 @@ git-checkout() {
 
     if [ $errcode -ne 0 ]
     then
-        git-add-branches $1 && git checkout $1
+        git-fetch-branch $1 && git checkout $1
     else
         >&2 echo "$output"
         return $errcode
@@ -258,10 +292,29 @@ wazuh_uninstall() {
 
     # Forget package
 
-    if [ $(uname) = "Darwin" ]
-    then
+    case $(uname) in
+    Darwin)
         pkgutil --forget com.wazuh.pkg.wazuh-agent 2> /dev/null
-    fi
+        ;;
+    Linux)
+        if ls /var/lib/dpkg/info/wazuh-manager.* 1> /dev/null 2>&1; then
+            rm -f /var/lib/dpkg/info/wazuh-manager.*
+            dpkg --purge --force-remove-reinstreq wazuh-manager
+        fi
+
+        if ls /var/lib/dpkg/info/wazuh-agent.* 1> /dev/null 2>&1; then
+            rm -f /var/lib/dpkg/info/wazuh-agent.*
+            dpkg --purge --force-remove-reinstreq wazuh-agent
+        fi
+
+        if rpm -q wazuh-manager > /dev/null 2>&1; then
+            rpm -e --noscripts --notriggers wazuh-manager
+        fi
+
+        if rpm -q wazuh-agent > /dev/null 2>&1; then
+            rpm -e --noscripts --notriggers wazuh-agent
+        fi
+    esac
 }
 
 set-manager() {
