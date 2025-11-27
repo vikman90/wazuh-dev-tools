@@ -28,7 +28,7 @@ yum-install() {
 }
 
 setup_packages() {
-    if [ "$OS_NAME" != "fedora" ]
+    if [ "$OS_NAME" != "Fedora" ]
     then
         if [ $OS_MAJOR -ge 9 ]
         then
