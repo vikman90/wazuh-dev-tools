@@ -9,16 +9,15 @@ chown -R wazuh-indexer:wazuh-indexer /etc/wazuh-indexer/certs
 runuser -u wazuh-indexer -- /usr/share/wazuh-indexer/bin/opensearch &
 INDEXER_PID=$!
 
-# Initialize security on first run
+# Initialize security on first run if needed
 if [ ! -f /var/lib/wazuh-indexer/.security-initialized ]; then
     # Wait for indexer to be available
     until curl -XGET https://localhost:9200 -uadmin:admin -k -s -o /dev/null 2>/dev/null; do
         sleep 5
     done
 
-    # Run security initialization using the official script (needs root)
+    # Run security initialization using the official script
     /usr/share/wazuh-indexer/bin/indexer-security-init.sh
-
     touch /var/lib/wazuh-indexer/.security-initialized
 fi
 

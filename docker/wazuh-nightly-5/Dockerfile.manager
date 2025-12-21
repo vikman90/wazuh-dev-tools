@@ -1,14 +1,11 @@
-FROM ubuntu:22.04
-
-# Install dependencies
-RUN apt-get update && \
-    apt-get install -y lsb-release curl && \
-    rm -rf /var/lib/apt/lists/*
+FROM ubuntu:24.04
 
 ARG WAZUH_DATE=""
 
-# Install Wazuh Manager with dynamic download and fallback
-RUN ARCH=$(dpkg --print-architecture) && \
+# Install Wazuh Manager and dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends lsb-release curl ca-certificates adduser && \
+    ARCH=$(dpkg --print-architecture) && \
     if [ -z "$WAZUH_DATE" ]; then \
     WAZUH_DATE=$(curl -sI https://packages-dev.wazuh.com/nightly-backup | grep -i '^Date:' | cut -d' ' -f2-6 | xargs -I{} date -u -d "{}" +"%Y-%m-%d"); \
     fi && \
@@ -23,14 +20,14 @@ RUN ARCH=$(dpkg --print-architecture) && \
     fi; \
     done; \
     if [ "$FOUND" -eq 0 ]; then echo "Could not find Wazuh Manager package in the last 7 days"; exit 1; fi && \
-    dpkg -i /tmp/wazuh-manager.deb || apt-get install -f -y && \
-    rm /tmp/wazuh-manager.deb
+    apt-get install -y --no-install-recommends /tmp/wazuh-manager.deb && \
+    rm /tmp/wazuh-manager.deb && \
+    rm -rf /var/lib/apt/lists/*
 
 # Expose ports
 EXPOSE 1514 1515 1516 55000
 
 # Entrypoint script
 COPY manager-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/manager-entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/manager-entrypoint.sh"]

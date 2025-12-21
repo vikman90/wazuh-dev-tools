@@ -57,6 +57,19 @@ services:
     networks:
       - wazuh-network
 
+  wazuh-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    profiles:
+      - agent
+    depends_on:
+      - wazuh-manager
+    environment:
+      - WAZUH_MANAGER=wazuh-manager
+    networks:
+      - wazuh-network
+
 volumes:
   wazuh-certs:
     driver: local

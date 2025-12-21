@@ -13,13 +13,10 @@ cp /tmp/wazuh-certs/* /etc/wazuh-indexer/certs/
 chmod 500 /etc/wazuh-indexer/certs
 chmod 400 /etc/wazuh-indexer/certs/*
 
-# Remove existing indexer sections
-while grep -q '<indexer>' /var/ossec/etc/ossec.conf; do
-    sed -i '/<indexer>/,/<\/indexer>/d' /var/ossec/etc/ossec.conf
-done
-
-# Add indexer configuration
-sed -i '0,/<\/ossec_config>/s|<\/ossec_config>|  <indexer>\
+# Replace the existing <indexer> block with the correct configuration
+CONF="/var/ossec/etc/ossec.conf"
+sed -i '/<indexer>/,/<\/indexer>/c\
+  <indexer>\
     <hosts>\
       <host>https://wazuh-indexer:9200</host>\
     </hosts>\
@@ -30,10 +27,10 @@ sed -i '0,/<\/ossec_config>/s|<\/ossec_config>|  <indexer>\
       <certificate>/etc/wazuh-indexer/certs/indexer.pem</certificate>\
       <key>/etc/wazuh-indexer/certs/indexer-key.pem</key>\
     </ssl>\
-  </indexer>\
-\
-</ossec_config>|' /var/ossec/etc/ossec.conf
+  </indexer>' "$CONF"
 
-# Start and keep running
+# Start Wazuh Manager
 /var/ossec/bin/wazuh-control start
-tail -f /var/ossec/logs/ossec.log
+
+# Keep container running by tailing the logs
+exec tail -f /var/ossec/logs/ossec.log

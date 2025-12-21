@@ -1,69 +1,54 @@
-# Wazuh Server Docker Compose
+# Wazuh 5.0 Docker Stack
 
-This setup deploys Wazuh Server components (Indexer, Manager, and Dashboard) using Docker Compose.
+This project provides a fully optimized Docker Compose environment for Wazuh 5.0, including the Server stack and scalable Agents.
 
-## Structure
+## Components
 
-- **Wazuh Indexer**: OpenSearch-based indexing engine
-- **Wazuh Manager**: Security event processing and analysis
-- **Wazuh Dashboard**: Web UI for visualization and management
-
-## Prerequisites
-
-Ensure you have the following DEB packages in this directory:
-- `wazuh-indexer*.deb`
-- `wazuh-manager*.deb`
-- `wazuh-dashboard*.deb`
+- **Wazuh Indexer**: Security event indexing engine.
+- **Wazuh Manager**: Central processing and analysis core.
+- **Wazuh Dashboard**: Visualization and management UI.
+- **Wazuh Agent**: Scalable security endpoints.
 
 ## Usage
 
-### Build and start all services
-
+### 1. Launch the Server Stack
+Starts the Indexer, Manager, and Dashboard.
 ```bash
-docker-compose up -d --build
+docker compose up -d
 ```
 
-### View logs
-
+### 2. Launch Agents (with Scaling)
+Agents use the `agent` profile. You can scale them dynamically:
 ```bash
-# All services
-docker-compose logs -f
+# Start 1 agent (default)
+docker compose --profile agent up -d
 
-# Specific service
-docker-compose logs -f wazuh-indexer
-docker-compose logs -f wazuh-manager
-docker-compose logs -f wazuh-dashboard
+# Start 5 agents (scaling)
+docker compose --profile agent up -d --scale wazuh-agent=5
 ```
 
-### Stop services
+## Management
 
+### View Logs
 ```bash
-docker-compose down
+# Server logs
+docker compose logs -f
+
+# Agent logs
+docker compose logs -f wazuh-agent
 ```
 
-### Stop and remove volumes (complete cleanup)
-
+### Cleanup
 ```bash
-docker-compose down -v
+# Stop all services
+docker compose --profile agent down
+
+# Complete removal (including data)
+docker compose --profile agent down -v
 ```
 
-## Ports
+## Configuration Note
 
-- **9200**: Wazuh Indexer (HTTPS)
-- **1514**: Wazuh Manager - Agent events (TCP/UDP)
-- **1515**: Wazuh Manager - Agent registration
-- **1516**: Wazuh Manager - Cluster communication
-- **55000**: Wazuh Manager - API (HTTPS)
-- **443**: Wazuh Dashboard (HTTPS)
-
-## Shared Volumes
-
-- `wazuh-certs`: Shared SSL/TLS certificates between components
-- `indexer-data`: Wazuh Indexer data persistence
-- `manager-data`: Wazuh Manager data persistence
-
-## Notes
-
-- Certificates are automatically generated during the first Indexer startup with `GENERATE_CERTS=true`
-- All components share the `wazuh-certs` volume for certificate exchange
-- The Manager and Dashboard wait for certificates to be available before starting
+- **Automatic Downloads**: Dockerfiles automatically download the latest 5.0 nightly builds.
+- **Auto-Provisioning**: Certificates are generated on the first run; agents self-register with the manager on startup.
+- **Ports**: 443 (Dashboard), 9200 (Indexer), 1514-1516/55000 (Manager).

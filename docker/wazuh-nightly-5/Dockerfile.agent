@@ -1,0 +1,30 @@
+FROM ubuntu:24.04
+
+ARG WAZUH_DATE=""
+
+# Install Wazuh Agent and dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl ca-certificates adduser && \
+    ARCH=$(dpkg --print-architecture) && \
+    if [ -z "$WAZUH_DATE" ]; then \
+    WAZUH_DATE=$(curl -sI https://packages-dev.wazuh.com/nightly-backup | grep -i '^Date:' | cut -d' ' -f2-6 | xargs -I{} date -u -d "{}" +"%Y-%m-%d"); \
+    fi && \
+    FOUND=0; \
+    for i in $(seq 0 7); do \
+    CURRENT_DATE=$(date -d "$WAZUH_DATE - $i days" +%Y-%m-%d); \
+    URL="https://packages-dev.wazuh.com/nightly-backup/${CURRENT_DATE}/wazuh-agent_5.0.0-latest_${ARCH}.deb"; \
+    if curl -sI --fail "$URL" > /dev/null; then \
+    echo "Found package for date ${CURRENT_DATE}"; \
+    curl -sSL "$URL" -o /tmp/wazuh-agent.deb; \
+    FOUND=1; break; \
+    fi; \
+    done; \
+    if [ "$FOUND" -eq 0 ]; then echo "Could not find Wazuh Agent package in the last 7 days"; exit 1; fi && \
+    apt-get install -y --no-install-recommends /tmp/wazuh-agent.deb && \
+    rm /tmp/wazuh-agent.deb && \
+    rm -rf /var/lib/apt/lists/*
+
+# Entrypoint script
+COPY agent-entrypoint.sh /usr/local/bin/
+
+ENTRYPOINT ["/usr/local/bin/agent-entrypoint.sh"]

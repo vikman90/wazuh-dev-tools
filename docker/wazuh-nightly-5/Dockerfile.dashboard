@@ -1,14 +1,11 @@
-FROM ubuntu:22.04
-
-# Install dependencies
-RUN apt-get update && \
-    apt-get install -y curl libcap2-bin && \
-    rm -rf /var/lib/apt/lists/*
+FROM ubuntu:24.04
 
 ARG WAZUH_DATE=""
 
-# Install Wazuh Dashboard with dynamic download and fallback
-RUN ARCH=$(dpkg --print-architecture) && \
+# Install Wazuh Dashboard and dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl ca-certificates libcap2-bin adduser && \
+    ARCH=$(dpkg --print-architecture) && \
     if [ -z "$WAZUH_DATE" ]; then \
     WAZUH_DATE=$(curl -sI https://packages-dev.wazuh.com/nightly-backup | grep -i '^Date:' | cut -d' ' -f2-6 | xargs -I{} date -u -d "{}" +"%Y-%m-%d"); \
     fi && \
@@ -23,18 +20,16 @@ RUN ARCH=$(dpkg --print-architecture) && \
     fi; \
     done; \
     if [ "$FOUND" -eq 0 ]; then echo "Could not find Wazuh Dashboard package in the last 7 days"; exit 1; fi && \
-    dpkg -i /tmp/wazuh-dashboard.deb || apt-get install -f -y && \
-    rm /tmp/wazuh-dashboard.deb
-
-# Create certs directory
-RUN mkdir -p /etc/wazuh-dashboard/certs && \
-    chmod 500 /etc/wazuh-dashboard/certs
+    apt-get install -y --no-install-recommends /tmp/wazuh-dashboard.deb && \
+    rm /tmp/wazuh-dashboard.deb && \
+    mkdir -p /etc/wazuh-dashboard/certs && \
+    chmod 500 /etc/wazuh-dashboard/certs && \
+    rm -rf /var/lib/apt/lists/*
 
 # Expose port
 EXPOSE 443
 
 # Entrypoint script
 COPY dashboard-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/dashboard-entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/dashboard-entrypoint.sh"]

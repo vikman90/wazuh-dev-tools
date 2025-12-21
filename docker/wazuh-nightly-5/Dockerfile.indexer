@@ -1,14 +1,11 @@
-FROM ubuntu:22.04
-
-# Install dependencies
-RUN apt-get update && \
-    apt-get install -y curl && \
-    rm -rf /var/lib/apt/lists/*
+FROM ubuntu:24.04
 
 ARG WAZUH_DATE=""
 
-# Install Wazuh Indexer with dynamic download and fallback
-RUN ARCH=$(dpkg --print-architecture) && \
+# Install Wazuh Indexer and dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl ca-certificates adduser && \
+    ARCH=$(dpkg --print-architecture) && \
     if [ -z "$WAZUH_DATE" ]; then \
     WAZUH_DATE=$(curl -sI https://packages-dev.wazuh.com/nightly-backup | grep -i '^Date:' | cut -d' ' -f2-6 | xargs -I{} date -u -d "{}" +"%Y-%m-%d"); \
     fi && \
@@ -23,15 +20,15 @@ RUN ARCH=$(dpkg --print-architecture) && \
     fi; \
     done; \
     if [ "$FOUND" -eq 0 ]; then echo "Could not find Wazuh Indexer package in the last 7 days"; exit 1; fi && \
-    GENERATE_CERTS=true dpkg -i /tmp/wazuh-indexer.deb || apt-get install -f -y && \
+    GENERATE_CERTS=true apt-get install -y --no-install-recommends /tmp/wazuh-indexer.deb && \
     rm /tmp/wazuh-indexer.deb && \
-    chmod 644 /etc/default/wazuh-indexer
+    chmod 644 /etc/default/wazuh-indexer && \
+    rm -rf /var/lib/apt/lists/*
 
 # Expose port
 EXPOSE 9200
 
 # Startup script
 COPY indexer-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/indexer-entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/indexer-entrypoint.sh"]
