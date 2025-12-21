@@ -5,12 +5,26 @@ RUN apt-get update && \
     apt-get install -y curl && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy DEB package
-COPY wazuh-indexer*.deb /tmp/
+ARG WAZUH_DATE=""
 
-# Install Wazuh Indexer with certificate generation
-RUN GENERATE_CERTS=true dpkg -i /tmp/wazuh-indexer*.deb || apt-get install -f -y && \
-    rm /tmp/wazuh-indexer*.deb && \
+# Install Wazuh Indexer with dynamic download and fallback
+RUN ARCH=$(dpkg --print-architecture) && \
+    if [ -z "$WAZUH_DATE" ]; then \
+    WAZUH_DATE=$(curl -sI https://packages-dev.wazuh.com/nightly-backup | grep -i '^Date:' | cut -d' ' -f2-6 | xargs -I{} date -u -d "{}" +"%Y-%m-%d"); \
+    fi && \
+    FOUND=0; \
+    for i in $(seq 0 7); do \
+    CURRENT_DATE=$(date -d "$WAZUH_DATE - $i days" +%Y-%m-%d); \
+    URL="https://packages-dev.wazuh.com/nightly-backup/${CURRENT_DATE}/wazuh-indexer_5.0.0-latest_${ARCH}.deb"; \
+    if curl -sI --fail "$URL" > /dev/null; then \
+    echo "Found package for date ${CURRENT_DATE}"; \
+    curl -sSL "$URL" -o /tmp/wazuh-indexer.deb; \
+    FOUND=1; break; \
+    fi; \
+    done; \
+    if [ "$FOUND" -eq 0 ]; then echo "Could not find Wazuh Indexer package in the last 7 days"; exit 1; fi && \
+    GENERATE_CERTS=true dpkg -i /tmp/wazuh-indexer.deb || apt-get install -f -y && \
+    rm /tmp/wazuh-indexer.deb && \
     chmod 644 /etc/default/wazuh-indexer
 
 # Expose port
