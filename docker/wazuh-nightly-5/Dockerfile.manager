@@ -1,0 +1,22 @@
+FROM ubuntu:22.04
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y lsb-release curl && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy DEB package
+COPY wazuh-manager*.deb /tmp/
+
+# Install Wazuh Manager
+RUN dpkg -i /tmp/wazuh-manager*.deb || apt-get install -f -y && \
+    rm /tmp/wazuh-manager*.deb
+
+# Expose ports
+EXPOSE 1514 1515 1516 55000
+
+# Entrypoint script
+COPY manager-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/manager-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/manager-entrypoint.sh"]

@@ -1,0 +1,70 @@
+services:
+  wazuh-indexer:
+    build:
+      context: .
+      dockerfile: Dockerfile.indexer
+    container_name: wazuh-indexer
+    hostname: wazuh-indexer
+    environment:
+      - GENERATE_CERTS=true
+    volumes:
+      - wazuh-certs:/etc/wazuh-indexer/certs
+      - indexer-data:/var/lib/wazuh-indexer
+    ports:
+      - "9200:9200"
+    networks:
+      - wazuh-network
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+
+  wazuh-manager:
+    build:
+      context: .
+      dockerfile: Dockerfile.manager
+    container_name: wazuh-manager
+    hostname: wazuh-manager
+    depends_on:
+      - wazuh-indexer
+    volumes:
+      - wazuh-certs:/tmp/wazuh-certs:ro
+      - manager-data:/var/ossec
+    ports:
+      - "1514:1514"
+      - "1515:1515"
+      - "1516:1516"
+      - "55000:55000"
+    networks:
+      - wazuh-network
+
+  wazuh-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: wazuh-dashboard
+    hostname: wazuh-dashboard
+    depends_on:
+      - wazuh-indexer
+      - wazuh-manager
+    volumes:
+      - wazuh-certs:/tmp/wazuh-certs:ro
+    ports:
+      - "443:443"
+    networks:
+      - wazuh-network
+
+volumes:
+  wazuh-certs:
+    driver: local
+  indexer-data:
+    driver: local
+  manager-data:
+    driver: local
+
+networks:
+  wazuh-network:
+    driver: bridge
