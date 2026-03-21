@@ -2,7 +2,7 @@
 # Wazuh Inc.
 # May 22, 2016
 #
-# Rev 21
+# Rev 22
 #
 # Install:
 # Go to the directory that contains this file and run:
@@ -44,7 +44,7 @@ alias make-deps="make deps -j$THREADS"
 alias make-deps-winagent="make deps TARGET=winagent -j$THREADS"
 
 alias install-manager='USER_LANGUAGE="en" USER_NO_STOP="y" USER_INSTALL_TYPE="server" USER_DIR="/var/ossec" USER_ENABLE_EMAIL="n" USER_ENABLE_SYSCHECK="y" USER_ENABLE_ROOTCHECK="y" USER_WHITE_LIST="n" USER_ENABLE_SYSLOG="y" USER_ENABLE_AUTHD="y" USER_UPDATE="y" USER_AUTO_START="n" ./install.sh'
-alias install-agent='USER_LANGUAGE="en" USER_NO_STOP="y" USER_INSTALL_TYPE="agent" USER_DIR="/var/ossec" USER_AGENT_SERVER_IP="manager" USER_ENABLE_SYSCHECK="y" USER_ENABLE_ROOTCHECK="y" USER_ENABLE_ACTIVE_RESPONSE="y" USER_CA_STORE="n" USER_UPDATE="y" ./install.sh'
+alias install-agent='USER_LANGUAGE="en" USER_NO_STOP="y" USER_INSTALL_TYPE="agent" USER_DIR="/var/ossec" USER_AGENT_MANAGER_IP="manager" USER_AGENT_SERVER_IP="manager" USER_ENABLE_SYSCHECK="y" USER_ENABLE_ROOTCHECK="y" USER_ENABLE_ACTIVE_RESPONSE="y" USER_CA_STORE="n" USER_UPDATE="y" ./install.sh'
 
 alias make-test="make clean && make-server && make clean-internals && make-agent && make clean-internals && make-local && make clean && make-winagent && make clean"
 alias make-docker="make SOURCE=$HOME/ossec-wazuh JOBS=$THREADS"
@@ -79,9 +79,16 @@ alias valgrind-all="valgrind --track-fds=yes --leak-check=full --show-leak-kinds
 
 alias docker-rm="docker rm -f \$(docker ps -aq) 2> /dev/null"
 alias docker-rmi="docker rmi -f \$(docker images | awk '/^<none>/ {print \$3}') 2> /dev/null"
-alias docker-rmv='docker-rm && docker volume ls -q | xargs docker volume rm -f'
+alias docker-rmv='docker-rm ; docker volume ls -q | xargs docker volume rm -f'
 alias docker-run="docker run -it --rm"
 alias docker-restart="docker compose build && docker compose down && docker compose up"
+
+docker_shell() {
+    [ -z "$1" ] && return 1
+    docker exec -it $1 bash
+}
+
+alias docker-shell=docker_shell
 
 alias watch-doc="make clean && make -j$THREADS html && while true; do inotifywait -re CLOSE_WRITE source; make -j$THREADS html; done"
 
@@ -97,7 +104,7 @@ alias scan-build-server='find /tmp -name "scan-build-*" -exec rm -r {} +; scan-b
 
 alias unit-tests-server='make-server-test && (cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=server .. && make -j$THREADS && ctest)'
 alias unit-tests-agent='make-agent-test && (cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=agent .. && make -j$THREADS && ctest)'
-alias unit-tests-winagent='make-winagent-test && (cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=winagent -DCMAKE_TOOLCHAIN_FILE=../Toolchain-win32.cmake .. && make -j$THREADS && WINEPATH="/usr/i686-w64-mingw32/lib;/usr/lib/gcc/i686-w64-mingw32/13-posix;$(realpath $(pwd)/../..);$(realpath $(pwd)/../../shared_modules/sync_protocol/build/bin)" ctest)'
+alias unit-tests-winagent='make-winagent-test && (cd unit_tests && mkdir -p build && cd build && cmake -DTARGET=winagent -DCMAKE_TOOLCHAIN_FILE=../Toolchain-win32.cmake .. && make -j$THREADS && WINEPATH="/usr/i686-w64-mingw32/lib;/usr/lib/gcc/i686-w64-mingw32/13-posix;$(realpath $(pwd)/../..);$(realpath $(pwd)/../../shared_modules/sync_protocol/build/bin);$(realpath $(pwd)/../../build/bin)" ctest)'
 
 WAZUH_API_USERNAME=${WAZUH_API_USERNAME:-wazuh}
 WAZUH_API_PASSWORD=${WAZUH_API_PASSWORD:-wazuh}
