@@ -32,7 +32,7 @@ services:
       - wazuh-indexer
     volumes:
       - wazuh-certs:/tmp/wazuh-certs:ro
-      - manager-data:/var/ossec
+      - manager-data:/var/wazuh-manager
     ports:
       - "1514:1514"
       - "1515:1515"

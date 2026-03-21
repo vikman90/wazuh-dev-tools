@@ -14,7 +14,7 @@ chmod 500 /etc/wazuh-indexer/certs
 chmod 400 /etc/wazuh-indexer/certs/*
 
 # Replace the existing <indexer> block with the correct configuration
-CONF="/var/ossec/etc/ossec.conf"
+CONF="/var/wazuh-manager/etc/wazuh-manager.conf"
 sed -i '/<indexer>/,/<\/indexer>/c\
   <indexer>\
     <hosts>\
@@ -30,7 +30,7 @@ sed -i '/<indexer>/,/<\/indexer>/c\
   </indexer>' "$CONF"
 
 # Start Wazuh Manager
-/var/ossec/bin/wazuh-control start
+/var/wazuh-manager/bin/wazuh-manager-control start
 
 # Keep container running by tailing the logs
-exec tail -f /var/ossec/logs/ossec.log
+exec tail -f /var/wazuh-manager/logs/wazuh-manager.log
