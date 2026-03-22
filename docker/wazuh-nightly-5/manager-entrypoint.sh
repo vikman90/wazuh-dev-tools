@@ -8,26 +8,14 @@ while [ ! -f /tmp/wazuh-certs/root-ca.pem ]; do
 done
 
 # Copy certificates to the expected location
-mkdir -p /etc/wazuh-indexer/certs
-cp /tmp/wazuh-certs/* /etc/wazuh-indexer/certs/
-chmod 500 /etc/wazuh-indexer/certs
-chmod 400 /etc/wazuh-indexer/certs/*
+install -d -m 500 -o wazuh-manager -g wazuh-manager /var/wazuh-manager/etc/certs
+install -m 400 -o wazuh-manager -g wazuh-manager /tmp/wazuh-certs/root-ca.pem /var/wazuh-manager/etc/certs/root-ca.pem
+install -m 400 -o wazuh-manager -g wazuh-manager /tmp/wazuh-certs/admin.pem /var/wazuh-manager/etc/certs/manager.pem
+install -m 400 -o wazuh-manager -g wazuh-manager /tmp/wazuh-certs/admin-key.pem /var/wazuh-manager/etc/certs/manager-key.pem
 
-# Replace the existing <indexer> block with the correct configuration
+# Point indexer configuration to the Docker service name
 CONF="/var/wazuh-manager/etc/wazuh-manager.conf"
-sed -i '/<indexer>/,/<\/indexer>/c\
-  <indexer>\
-    <hosts>\
-      <host>https://wazuh-indexer:9200</host>\
-    </hosts>\
-    <ssl>\
-      <certificate_authorities>\
-        <ca>/etc/wazuh-indexer/certs/root-ca.pem</ca>\
-      </certificate_authorities>\
-      <certificate>/etc/wazuh-indexer/certs/indexer.pem</certificate>\
-      <key>/etc/wazuh-indexer/certs/indexer-key.pem</key>\
-    </ssl>\
-  </indexer>' "$CONF"
+sed -i 's|<host>https://127.0.0.1:9200</host>|<host>https://wazuh-indexer:9200</host>|g' "$CONF"
 
 # Start Wazuh Manager
 /var/wazuh-manager/bin/wazuh-manager-control start
